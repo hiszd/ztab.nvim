@@ -1,9 +1,14 @@
 -- Shamelessly stolen from
 -- https://github.com/hoob3rt/lualine.nvim/blob/master/lua/lualine/utils/utils.lua
 
+require('ztab.types')
+local constants = require('ztab.constants')
+
 local fmt = string.format
 
 local M = {}
+
+local PREFIX = "ZTab"
 
 --- Create a highlight name from a string using the bufferline prefix as well as appending the state
 --- of the element
@@ -13,11 +18,17 @@ local M = {}
 function M.generate_name_for_state(name, opts)
   opts = opts or {}
   local visibility_suffix = ({
-        Inactive = "Inactive",
-        Selected = "Selected",
-        None = "",
-      })[opts.visibility]
+    Inactive = "Inactive",
+    Selected = "Selected",
+    None = "",
+  })[opts.visibility]
   return fmt("%s%s%s", PREFIX, name, visibility_suffix)
+end
+
+M.get_hl_name = function(hl_name, sel)
+  if sel then
+    return PREFIX .. '_' .. hl_name .. (sel and constants.hl_appends["selected"] or '')
+  end
 end
 
 M.hc_names = {
@@ -28,8 +39,8 @@ M.hc_names = {
 -- highlight string constants
 ---@type table<string, string>
 M.hc = {
-      [M.hc_names.tabline] = "%#TabLine#",
-      [M.hc_names.tablinesel] = "%#TabLineSel#",
+  [M.hc_names.tabline] = "%#TabLine#",
+  [M.hc_names.tablinesel] = "%#TabLineSel#",
 }
 
 --- Wrap a string in vim's tabline highlight syntax
@@ -51,11 +62,15 @@ M.highlight = function(name, foreground, background)
   vim.cmd(table.concat(command, ' '))
 end
 
+
+---@param color
 M.create_component_highlight_group = function(color, highlight_tag)
   if color.bg and color.fg then
-    local highlight_group_name = table.concat({ 'LuaTab', highlight_tag }, '_')
-    M.highlight(highlight_group_name, color.fg, color.bg)
-    return highlight_group_name
+    local highlight_group_name = table.concat({ PREFIX, highlight_tag }, '_')
+    if vim.fn.hlexists(highlight_group_name) == 0 then
+      vim.api.nvim_set_hl(0, highlight_group_name, { fg = color.fg, bg = color.bg })
+      return highlight_group_name
+    end
   end
 end
 
