@@ -7,7 +7,7 @@ M.padding = " "
 M.indicator = "▎"
 
 M.hl_appends = {
-  ["selected"] = "Selected",
+      ["selected"] = "Selected",
 }
 
 M.highlight_names = {
@@ -19,6 +19,7 @@ M.highlight_names = {
   modified_sel = "ModifiedSelected",
   icon = "Icon",
   icon_sel = "IconSelected",
+  fill = "Fill",
 }
 
 M.sep_names = {
@@ -31,11 +32,11 @@ M.sep_names = {
 
 ---@type table<string, string[]>
 M.sep_chars = {
-  [M.sep_names.thin] = { "▏", "▕" },
-  [M.sep_names.thick] = { "▌", "▐" },
-  [M.sep_names.slant] = { "", "" },
-  [M.sep_names.slope] = { "", "" },
-  [M.sep_names.padded_slant] = { "" .. M.padding, "" .. M.padding },
+      [M.sep_names.thin] = { "▏", "▕" },
+      [M.sep_names.thick] = { "▌", "▐" },
+      [M.sep_names.slant] = { "", "" },
+      [M.sep_names.slope] = { "", "" },
+      [M.sep_names.padded_slant] = { "" .. M.padding, "" .. M.padding },
 }
 
 M.positions_key = "BufferlinePositions"

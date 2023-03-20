@@ -4,15 +4,19 @@ require('ztab.types')
 
 local constants = require('ztab.constants')
 local highlight = require('ztab.highlight')
-local util = require('ztab.utils')
-
-local defaulthl = highlight.extract_highlight_colors('Tabline') or
-    { bg = '', fg = '', background = '', foreground = '' }
-local defaultselhl = highlight.extract_highlight_colors('TablineSel') or
-    { bg = '', fg = '', background = '', foreground = '' }
 
 ---@type table
 local M = {}
+
+---@param isSelected boolean
+---@return string
+M.spacer = function(isSelected)
+  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
+  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
+
+  return (isSelected and selhl or hl) .. ' '
+end
+
 
 ---------------------------------------------------------------------------//
 -- Default Config
@@ -20,48 +24,16 @@ local M = {}
 ---@type ConfigType
 M.__config = {
   sep_name = constants.sep_names.thick,
-  highlight = {
-    ["separator"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-    },
-    ["separator_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-    },
-    ["title"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-    },
-    ["title_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-    },
-    ["modified"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-    },
-    ["modified_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-    },
-    ["icon"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-    },
-    ["icon_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-    },
-  }
+  left_sep = true,
+  right_sep = false,
+  devicon_colors = "selected",
+  highlight = highlight.default_hl,
 }
 
----@type string
-local tabselhl = '%#TabLineSel#'
----@type string
-local tabhl = '%#TabLine#'
-
--- Get tab title text
+--- Get tab title text
+---@param bufnr number
+---@param isSelected boolean
+---@return string
 M.title = function(bufnr, isSelected)
   local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected)
   local file = vim.fn.bufname(bufnr)
@@ -69,7 +41,6 @@ M.title = function(bufnr, isSelected)
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
 
   local rtrn = highlight.hl(hl)
-  P("title: " .. highlight.hl(hl))
 
   if buftype == 'help' then
     rtrn = rtrn .. 'help:' .. vim.fn.fnamemodify(file, ':t:r')
@@ -85,25 +56,30 @@ M.title = function(bufnr, isSelected)
     rtrn = rtrn .. 'FZF'
   elseif buftype == 'terminal' then
     local _, mtch = string.match(file, "term:(.*):(%a+)")
-    rtrn = rtrn .. mtch ~= nil and mtch or vim.fn.fnamemodify(vim.env.SHELL, ':t')
+    rtrn = rtrn .. (mtch ~= nil and mtch or vim.fn.fnamemodify(vim.env.SHELL, ':t'))
   elseif file == '' then
     rtrn = rtrn .. '[No Name]'
   else
     rtrn = rtrn .. vim.fn.pathshorten(vim.fn.fnamemodify(file, ':p:~:t'))
   end
-  P(rtrn)
   return rtrn
 end
 
+--- Get tab modified content
+---@param bufnr number
+---@param isSelected boolean
+---@return string
 M.modified = function(bufnr, isSelected)
   local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected)
-  P(highlight.hl(hl))
   local ret = highlight.hl(hl)
-  ret = ret .. vim.fn.getbufvar(bufnr, '&modified') == 1 and '[+] ' or ''
-  ret = ret .. (isSelected and tabselhl or tabhl)
+  ret = ret .. (vim.fn.getbufvar(bufnr, '&modified') == 1 and ('[+]' .. M.spacer(isSelected)) or '')
   return ret
 end
 
+--- Get tab devicon content
+---@param bufnr number
+---@param isSelected boolean
+---@return string
 M.devicon = function(bufnr, isSelected)
   local icon, devhl
   local file = vim.fn.bufname(bufnr)
@@ -123,17 +99,24 @@ M.devicon = function(bufnr, isSelected)
   end
   if icon then
     local h = require 'ztab.highlight'
-    local fg = h.extract_highlight_colors(devhl, 'fg')
-    local bg = h.extract_highlight_colors('TabLineSel', 'bg')
-    local hl = h.create_component_highlight_group({ bg = bg, fg = fg }, devhl)
-    local selectedHlStart = (isSelected and hl) and '%#' .. hl .. '#' or ''
-    local selectedHlEnd = isSelected and tabselhl or tabhl
-    return selectedHlStart .. icon .. selectedHlEnd .. ' '
+    local hl_name = h.get_hl_name(constants.highlight_names.icon, isSelected, true)
+    local fg = h.extract_highlight_colors((isSelected and devhl or hl_name)).fg
+    if M.__config.devicon_colors == "true" then
+      fg = h.extract_highlight_colors(devhl).fg
+    elseif M.__config.devicon_colors == "false" then
+      fg = h.extract_highlight_colors(hl_name).fg
+    end
+    local bg = h.extract_highlight_colors(hl_name).bg
+    local hl = h.update_component_highlight_group({ bg = bg, fg = fg }, h.get_hl_name(devhl, isSelected, false))
+    -- P("hl: " .. (hl or '') .. ' and ' .. h.get_hl_name(devhl, isSelected, false))
+    local selectedHlStart = h.hl(hl)
+    local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected))
+    return selectedHlStart .. icon .. selectedHlEnd .. M.spacer(isSelected)
   end
   return ''
 end
 
----Get the seperator
+---Get separator content
 ---@param index number
 ---@param sel boolean
 ---@param side "left" | "right" | ""
@@ -144,21 +127,18 @@ M.separator = function(index, sel, side)
   end
   local hl = highlight.get_hl_name(constants.highlight_names.separator, sel)
   local last = index == vim.fn.tabpagenr('$')
-  local first = index == 0
+  local first = index == 1
   local sep = ""
 
   if side == "left" then
-    sep = constants.sep_chars[M.__config.sep_name][1]
-    if first then
-      return ''
-    end
-    return hl .. sep
-  elseif side == "right" then
     sep = constants.sep_chars[M.__config.sep_name][2]
-    if last then
-      return ''
+    if first and M.__config.sep_name == constants.sep_names.slant then
+      return highlight.hl(hl) .. ''
     end
-    return hl .. sep .. (sel and tabselhl or tabhl)
+    return highlight.hl(hl) .. sep
+  elseif side == "right" then
+    sep = constants.sep_chars[M.__config.sep_name][1]
+    return highlight.hl(hl) .. sep
   end
 
   return ''
@@ -167,70 +147,91 @@ end
 
 ---produce the tab cell
 ---@param index number
----@param opts CellOpts?
 ---@return string
-local cell = function(index, opts)
+local cell = function(index)
   local isSelected = vim.fn.tabpagenr() == index
   local buflist = vim.fn.tabpagebuflist(index)
   local winnr = vim.fn.tabpagewinnr(index)
   local bufnr = buflist[winnr]
+  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
+  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
+
+  local spacing = (isSelected and selhl or hl) .. M.spacer(isSelected)
 
   local ret = ''
-  if opts and opts.left_sep then
+  if M.__config.left_sep then
     ret = ret .. M.separator(index, isSelected, "left")
   end
-  ret = ret .. '%' .. index .. 'T' .. ' ' ..
-      M.title(bufnr, isSelected) .. ' ' ..
+  ret = ret .. '%' .. index .. 'T' .. spacing ..
+      M.title(bufnr, isSelected) .. spacing ..
       M.modified(bufnr, isSelected) ..
       M.devicon(bufnr, isSelected) .. '%T'
-  if opts and opts.right_sep then
+  if M.__config.right_sep then
     ret = ret .. M.separator(index, isSelected, "right")
   end
-  ret = ret .. tabhl
+  ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill))
 
   return ret
 end
 
-M.tabline = function()
+---------------------------------------------------------------------------//
+-- Tabline Constructor
+---------------------------------------------------------------------------//
+--- Get the tabline contents
+---@return string
+local tabline = function()
   local line = ''
   for i = 1, vim.fn.tabpagenr('$'), 1 do
     line = line .. cell(i)
   end
-  line = line .. '%#TabLineFill#%='
+  -- fill the rest with this hl group
+  line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. '%='
   if vim.fn.tabpagenr('$') > 1 then
-    line = line .. '%#TabLine#%999XX'
+    -- end the line with this terminator
+    line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. '%999XX'
   end
   return line
 end
 
+---@param highlights HighlightOpts
+---@return nil
+M.theme_update = function(highlights)
+  if highlights then M.__config.highlight = vim.tbl_deep_extend("keep", highlights, M.__config.highlight) end
+  for i, hlgrp in pairs(M.__config.highlight) do
+    if constants.highlight_names[i] then
+      local hl = highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+    end
+  end
+end
+
+
+---------------------------------------------------------------------------//
+-- Setup Function
+---------------------------------------------------------------------------//
+
 ---@param opts SetupOpts?
+---@return nil
 local setup = function(opts)
   if opts then
     if opts.sep_name then M.__config.sep_name = opts.sep_name end
+    if opts.left_sep then M.__config.left_sep = opts.left_sep end
+    if opts.right_sep then M.__config.right_sep = opts.right_sep end
+    if opts.devicon_colors then M.__config.devicon_colors = opts.devicon_colors end
     -- Merge the default configuration and the one provided by the user
-    if opts.highlight then M.__config.highlight = util.merge_tables(M.__config.highlight, opts.highlight) end
+    if opts.highlight then M.__config.highlight = vim.tbl_deep_extend("keep", opts.highlight, M.__config.highlight) end
   end
 
-  if opts and opts.highlight then
-    for i, grp in pairs(opts.highlight) do
-      if constants.highlight_names[i] and M.__config.highlight[i] then
-        M.__config.highlight[i].fg = grp.fg
-        M.__config.highlight[i].bg = grp.bg
-      else
-        print("highlight name " .. i .. "does not exist")
-      end
-    end
-  end
   for i, hlgrp in pairs(M.__config.highlight) do
     if constants.highlight_names[i] then
       local hl = highlight.create_component_highlight_group(hlgrp, constants.highlight_names[i])
     end
   end
 
-  vim.opt.tabline = '%!v:lua.require\'ztab\'.helpers.tabline()'
+  vim.opt.tabline = '%!v:lua.require\'ztab\'.tabline()'
 end
 
 return {
   helpers = M,
   setup = setup,
+  tabline = tabline,
 }
