@@ -21,6 +21,7 @@
 ---@field fg string
 ---@field bg string
 ---@field sp string?
+---@field underline boolean?
 
 ---@class SetupOpts
 ---@field sep_name SeparatorNames?

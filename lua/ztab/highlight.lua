@@ -9,26 +9,11 @@ local M = {}
 ---@type string
 local PREFIX = "ZTab"
 
---- Create a highlight name from a string using the bufferline prefix as well as appending the state
---- of the element
----@param name string
----@param opts NameGenerationArgs
----@return string
-function M.generate_name_for_state(name, opts)
-  opts = opts or {}
-  local visibility_suffix = ({
-        Inactive = "Inactive",
-        Selected = "Selected",
-        None = "",
-      })[opts.visibility]
-  return fmt("%s%s%s", PREFIX, name, visibility_suffix)
-end
-
 --- Get highlight name with or without prefix based on selection
----@param hl_name string
----@param sel boolean?
----@param pfix boolean?
----@return string
+---@param hl_name string #Highlight name
+---@param sel boolean? #Is tab selected
+---@param pfix boolean? #Should the prefix be prepended?
+---@return string #Return the final ZTab hl group name
 M.get_hl_name = function(hl_name, sel, pfix)
   if sel then
     if pfix == false then
@@ -46,38 +31,24 @@ M.get_hl_name = function(hl_name, sel, pfix)
 end
 
 --- Wrap a string in vim's tabline highlight syntax
----@param item string
----@return string
+---@param item string #Highlight group
+---@return string #Returns formatted string matching tabline highlight syntax
 function M.hl(item)
   if not item then return "" end
   return fmt("%%#%s#", item)
 end
 
----@param name string
----@param foreground string
----@param background string
----@return nil
-M.highlight = function(name, foreground, background)
-  local command = { 'highlight', name }
-  if foreground and foreground ~= 'none' then
-    table.insert(command, 'guifg=' .. foreground)
-  end
-  if background and background ~= 'none' then
-    table.insert(command, 'guibg=' .. background)
-  end
-  vim.cmd(table.concat(command, ' '))
-end
-
---- Create highlight group for the highlight_tag with prefix added
----, if the group doesn't already exist, and return the group name
----@param color HighlightGroup
----@param highlight_tag string
----@return string
+---Create highlight group for the highlight_tag with prefix added,
+---if the group doesn't already exist, and return the group name
+---@param color HighlightGroup #Highlight group information
+---@param highlight_tag string #Highlight group name without prefix
+---@return string #Complete highlight group name
 M.create_component_highlight_group = function(color, highlight_tag)
   if color.bg and color.fg then
     local highlight_group_name = table.concat({ PREFIX, highlight_tag }, '_')
     if vim.fn.hlexists(highlight_group_name) == 0 then
-      vim.api.nvim_set_hl(0, highlight_group_name, { fg = color.fg, bg = color.bg })
+      vim.api.nvim_set_hl(0, highlight_group_name,
+        { fg = color.fg, bg = color.bg, sp = (color.sp and color.sp or color.fg), underline = color.underline })
       return highlight_group_name
     end
   else
@@ -88,13 +59,14 @@ M.create_component_highlight_group = function(color, highlight_tag)
 end
 
 --- Update highlight group for the highlight_tag with prefix added and return the group name
----@param color HighlightGroup
----@param highlight_tag string
----@return string
+---@param color HighlightGroup #Highlight group information
+---@param highlight_tag string #Highlight group name without prefix
+---@return string #Complete highlight group name
 M.update_component_highlight_group = function(color, highlight_tag)
   if color.bg and color.fg then
     local highlight_group_name = table.concat({ PREFIX, highlight_tag }, '_')
-    vim.api.nvim_set_hl(0, highlight_group_name, { fg = color.fg, bg = color.bg })
+    vim.api.nvim_set_hl(0, highlight_group_name,
+      { fg = color.fg, bg = color.bg, sp = (color.sp and color.sp or color.fg), underline = color.underline })
     return highlight_group_name
   else
     print("need to specify a background and foreground color")
@@ -105,8 +77,8 @@ end
 
 
 --- Get colors from a highlight group and return them
----@param color_group string
----@return HighlightGroup | nil
+---@param color_group string #Highlight group name
+---@return HighlightGroup | nil #Returns highlight group color information
 M.extract_highlight_colors = function(color_group)
   if vim.fn.hlexists(color_group) == 0 then return nil end
   local color = vim.api.nvim_get_hl_by_name(color_group, true)
@@ -130,41 +102,59 @@ local defaultselhl = M.extract_highlight_colors('TablineSel') or
 
 ---@type HighlightOpts
 M.default_hl = {
-      ["separator"] = {
+  ["separator"] = {
     fg = defaulthl.bg,
     bg = defaulthl.bg,
+    sp = "#00ff00",
+    underline = false,
   },
-      ["separator_sel"] = {
+  ["separator_sel"] = {
     fg = defaulthl.bg,
     bg = defaultselhl.bg,
+    sp = "#00ff00",
+    underline = false,
   },
-      ["title"] = {
+  ["title"] = {
     fg = defaulthl.fg,
     bg = defaulthl.bg,
+    sp = "#00ff00",
+    underline = true,
   },
-      ["title_sel"] = {
+  ["title_sel"] = {
     fg = defaultselhl.fg,
     bg = defaultselhl.bg,
+    sp = "#00ff00",
+    underline = true,
   },
-      ["modified"] = {
+  ["modified"] = {
     fg = defaulthl.fg,
     bg = defaulthl.bg,
+    sp = "#00ff00",
+    underline = false,
   },
-      ["modified_sel"] = {
+  ["modified_sel"] = {
     fg = defaultselhl.fg,
     bg = defaultselhl.bg,
+    sp = "#00ff00",
+    underline = false,
   },
-      ["icon"] = {
+  ["icon"] = {
     fg = defaulthl.fg,
     bg = defaulthl.bg,
+    sp = "#00ff00",
+    underline = false,
   },
-      ["icon_sel"] = {
+  ["icon_sel"] = {
     fg = defaultselhl.fg,
     bg = defaultselhl.bg,
+    sp = "#00ff00",
+    underline = false,
   },
-      ["fill"] = {
+  ["fill"] = {
     fg = defaultfillhl.fg,
     bg = defaultfillhl.bg,
+    sp = "#00ff00",
+    underline = false,
   }
 }
 

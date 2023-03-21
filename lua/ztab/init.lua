@@ -8,8 +8,8 @@ local highlight = require('ztab.highlight')
 ---@type table
 local M = {}
 
----@param isSelected boolean
----@return string
+---@param isSelected boolean #Is the tab selected
+---@return string #Return spacer with highlights
 M.spacer = function(isSelected)
   local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
   local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
@@ -31,9 +31,9 @@ M.__config = {
 }
 
 --- Get tab title text
----@param bufnr number
----@param isSelected boolean
----@return string
+---@param bufnr number #Buffer number
+---@param isSelected boolean #Is the tab selected?
+---@return string #Return title component with highlights
 M.title = function(bufnr, isSelected)
   local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected)
   local file = vim.fn.bufname(bufnr)
@@ -66,9 +66,9 @@ M.title = function(bufnr, isSelected)
 end
 
 --- Get tab modified content
----@param bufnr number
----@param isSelected boolean
----@return string
+---@param bufnr number #Buffer number
+---@param isSelected boolean #Is the tab selected
+---@return string #Return modified component with highlights
 M.modified = function(bufnr, isSelected)
   local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected)
   local ret = highlight.hl(hl)
@@ -77,9 +77,9 @@ M.modified = function(bufnr, isSelected)
 end
 
 --- Get tab devicon content
----@param bufnr number
----@param isSelected boolean
----@return string
+---@param bufnr number #Buffer number
+---@param isSelected boolean #Is the tab selected?
+---@return string #Return devicon with highlights
 M.devicon = function(bufnr, isSelected)
   local icon, devhl
   local file = vim.fn.bufname(bufnr)
@@ -117,10 +117,10 @@ M.devicon = function(bufnr, isSelected)
 end
 
 ---Get separator content
----@param index number
----@param sel boolean
----@param side "left" | "right" | ""
----@return string
+---@param index number #Tab index
+---@param sel boolean #Is the tab selected?
+---@param side "left" | "right" | "" #Side of separator to render
+---@return string #Seperator with highlights
 M.separator = function(index, sel, side)
   if side ~= "left" and side ~= "right" then
     return ""
@@ -145,9 +145,9 @@ M.separator = function(index, sel, side)
 end
 
 
----produce the tab cell
----@param index number
----@return string
+---Produce the tab cell
+---@param index number #Tab index
+---@return string #Tab cell
 local cell = function(index)
   local isSelected = vim.fn.tabpagenr() == index
   local buflist = vim.fn.tabpagebuflist(index)
@@ -177,8 +177,7 @@ end
 ---------------------------------------------------------------------------//
 -- Tabline Constructor
 ---------------------------------------------------------------------------//
---- Get the tabline contents
----@return string
+---@return string #Returns the tabline
 local tabline = function()
   local line = ''
   for i = 1, vim.fn.tabpagenr('$'), 1 do
@@ -193,7 +192,7 @@ local tabline = function()
   return line
 end
 
----@param highlights HighlightOpts
+---@param highlights HighlightOpts #Highlight option fields
 ---@return nil
 M.theme_update = function(highlights)
   if highlights then M.__config.highlight = vim.tbl_deep_extend("keep", highlights, M.__config.highlight) end
@@ -208,9 +207,8 @@ end
 ---------------------------------------------------------------------------//
 -- Setup Function
 ---------------------------------------------------------------------------//
-
----@param opts SetupOpts?
----@return nil
+---@param opts SetupOpts? #Setup options
+---@return table #Return entire module
 local setup = function(opts)
   if opts then
     if opts.sep_name then M.__config.sep_name = opts.sep_name end
@@ -228,6 +226,7 @@ local setup = function(opts)
   end
 
   vim.opt.tabline = '%!v:lua.require\'ztab\'.tabline()'
+  return M
 end
 
 return {
