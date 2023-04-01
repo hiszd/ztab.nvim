@@ -103,10 +103,13 @@ M.extract_highlight_colors = function(color_group)
   return rtrn
 end
 
+local normhl = M.extract_highlight_colors("Normal") or { bg = "#FFFFFF", fg = "#000000" }
 local defaulthl = M.extract_highlight_colors("Tabline") or { bg = "#FFFFFF", fg = "#000000" }
 local defaultfillhl = M.extract_highlight_colors("TablineFill") or { bg = "#FFFFFF", fg = "#000000" }
 local defaultselhl = M.extract_highlight_colors("TablineSel") or { bg = "#FFFFFF", fg = "#000000" }
 
+print("norm")
+P(normhl)
 print("def")
 P(defaulthl)
 print("fill")
@@ -117,21 +120,21 @@ P(defaultselhl)
 ---@type HighlightOpts
 M.default_hl = {
   ["separator"] = {
-    fg = defaulthl.bg,
-    bg = defaultfillhl.bg,
-    sp = defaulthl.bg,
+    fg = normhl.bg,
+    bg = normhl.bg,
+    sp = defaulthl.fg,
     underline = false,
   },
   ["separator_sel"] = {
-    fg = defaulthl.bg,
+    fg = normhl.bg,
     bg = defaultselhl.bg,
     sp = defaulthl.bg,
     underline = false,
   },
   ["title"] = {
     fg = defaulthl.fg,
-    bg = defaulthl.bg,
-    sp = defaulthl.fg,
+    bg = normhl.bg,
+    sp = normhl.fg,
     underline = false,
   },
   ["title_sel"] = {
@@ -142,8 +145,8 @@ M.default_hl = {
   },
   ["modified"] = {
     fg = defaulthl.fg,
-    bg = defaulthl.bg,
-    sp = defaulthl.fg,
+    bg = normhl.bg,
+    sp = normhl.fg,
     underline = false,
   },
   ["modified_sel"] = {
@@ -154,8 +157,8 @@ M.default_hl = {
   },
   ["icon"] = {
     fg = defaulthl.fg,
-    bg = defaulthl.bg,
-    sp = defaulthl.fg,
+    bg = normhl.bg,
+    sp = normhl.fg,
     underline = false,
   },
   ["icon_sel"] = {
@@ -165,9 +168,9 @@ M.default_hl = {
     underline = false,
   },
   ["fill"] = {
-    fg = defaultfillhl.fg,
-    bg = defaultfillhl.bg,
-    sp = defaultfillhl.fg,
+    fg = normhl.fg,
+    bg = normhl.bg,
+    sp = normhl.fg,
     underline = false,
   },
 }
