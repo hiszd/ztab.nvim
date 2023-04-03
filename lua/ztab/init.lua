@@ -263,8 +263,8 @@ local setup = function(opts)
     end
   end
 
-  print("highlight config")
-  P(M.__config.highlight)
+  -- print("highlight config")
+  -- P(M.__config.highlight)
 
   for i, hlgrp in pairs(M.__config.highlight) do
     if constants.highlight_names[i] then
