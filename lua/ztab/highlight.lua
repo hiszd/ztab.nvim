@@ -84,15 +84,15 @@ end
 
 --- Get colors from a highlight group and return them
 ---@param color_group string #Highlight group name
----@return HighlightGroup | nil #Returns highlight group color information
+---@return HighlightGroup #Returns highlight group color information
 M.extract_highlight_colors = function(color_group)
+  local rtrn = { bg = "", fg = "" }
   if vim.fn.hlexists(color_group) == 0 then
-    return nil
+    return rtrn
   end
   local color = vim.api.nvim_get_hl_by_name(color_group, true)
-  local rtrn = { bg = "", fg = "" }
   if color.foreground == nil or color.background == nil then
-    return nil
+    return rtrn
   end
   if color.background ~= nil then
     rtrn.bg = string.format("#%06x", color.background)
@@ -103,76 +103,86 @@ M.extract_highlight_colors = function(color_group)
   return rtrn
 end
 
-local normhl = M.extract_highlight_colors("Normal") or { bg = "#FFFFFF", fg = "#000000" }
-local defaulthl = M.extract_highlight_colors("Tabline") or { bg = "#FFFFFF", fg = "#000000" }
-local defaultfillhl = M.extract_highlight_colors("TablineFill") or { bg = "#FFFFFF", fg = "#000000" }
-local defaultselhl = M.extract_highlight_colors("TablineSel") or { bg = "#FFFFFF", fg = "#000000" }
+M.default_hl = function()
+  local defaultcols = { bg = "#FFFFFF", fg = "#000000" }
 
-print("norm")
-P(normhl)
-print("def")
-P(defaulthl)
-print("fill")
-P(defaultfillhl)
-print("sel")
-P(defaultselhl)
+  local normhl = M.extract_highlight_colors("Normal")
+  normhl = vim.tbl_deep_extend("force", defaultcols, normhl)
+  local defaulthl = M.extract_highlight_colors("TabLine")
+  defaulthl = vim.tbl_deep_extend("force", defaultcols, defaulthl)
+  local defaultfillhl = M.extract_highlight_colors("TabLineFill")
+  defaultfillhl = vim.tbl_deep_extend("force", defaultcols, defaultfillhl)
+  local defaultselhl = M.extract_highlight_colors("TabLineSel")
+  defaultselhl = vim.tbl_deep_extend("force", defaultcols, defaultselhl)
 
----@type HighlightOpts
-M.default_hl = {
-  ["separator"] = {
-    fg = normhl.bg,
-    bg = normhl.bg,
-    sp = defaulthl.fg,
-    underline = false,
-  },
-  ["separator_sel"] = {
-    fg = normhl.bg,
-    bg = defaultselhl.bg,
-    sp = defaulthl.bg,
-    underline = false,
-  },
-  ["title"] = {
-    fg = defaulthl.fg,
-    bg = normhl.bg,
-    sp = normhl.fg,
-    underline = false,
-  },
-  ["title_sel"] = {
-    fg = defaultselhl.fg,
-    bg = defaultselhl.bg,
-    sp = defaultselhl.fg,
-    underline = true,
-  },
-  ["modified"] = {
-    fg = defaulthl.fg,
-    bg = normhl.bg,
-    sp = normhl.fg,
-    underline = false,
-  },
-  ["modified_sel"] = {
-    fg = defaultselhl.fg,
-    bg = defaultselhl.bg,
-    sp = defaultselhl.fg,
-    underline = false,
-  },
-  ["icon"] = {
-    fg = defaulthl.fg,
-    bg = normhl.bg,
-    sp = normhl.fg,
-    underline = false,
-  },
-  ["icon_sel"] = {
-    fg = defaultselhl.fg,
-    bg = defaultselhl.bg,
-    sp = defaultselhl.fg,
-    underline = false,
-  },
-  ["fill"] = {
-    fg = normhl.fg,
-    bg = normhl.bg,
-    sp = normhl.fg,
-    underline = false,
-  },
-}
+  print("norm")
+  P(normhl)
+  print("def")
+  P(defaulthl)
+  print("fill")
+  P(defaultfillhl)
+  print("sel")
+  P(defaultselhl)
+
+  ---@type HighlightOpts
+  local rtrn = {
+    ["separator"] = {
+      fg = defaultfillhl.bg,
+      bg = defaulthl.bg,
+      sp = defaulthl.fg,
+      underline = false,
+    },
+    ["separator_sel"] = {
+      fg = defaultfillhl.bg,
+      bg = defaultselhl.bg,
+      sp = defaulthl.bg,
+      underline = false,
+    },
+    ["title"] = {
+      fg = defaulthl.fg,
+      bg = defaulthl.bg,
+      sp = defaulthl.fg,
+      underline = false,
+    },
+    ["title_sel"] = {
+      fg = defaultselhl.fg,
+      bg = defaultselhl.bg,
+      sp = defaultselhl.fg,
+      underline = true,
+    },
+    ["modified"] = {
+      fg = defaulthl.fg,
+      bg = defaulthl.bg,
+      sp = defaulthl.fg,
+      underline = false,
+    },
+    ["modified_sel"] = {
+      fg = defaultselhl.fg,
+      bg = defaultselhl.bg,
+      sp = defaultselhl.fg,
+      underline = false,
+    },
+    ["icon"] = {
+      fg = defaulthl.fg,
+      bg = defaulthl.bg,
+      sp = defaulthl.fg,
+      underline = false,
+    },
+    ["icon_sel"] = {
+      fg = defaultselhl.fg,
+      bg = defaultselhl.bg,
+      sp = defaultselhl.fg,
+      underline = false,
+    },
+    ["fill"] = {
+      fg = defaultfillhl.fg,
+      bg = defaultfillhl.bg,
+      sp = defaultfillhl.fg,
+      underline = false,
+    },
+  }
+
+  return rtrn
+end
 
 return M
