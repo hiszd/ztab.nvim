@@ -1,11 +1,11 @@
----@alias SeparatorNames
+---@alias ZTabSeparatorNames
 ---| `constants.sep_names.thin`
 ---| `constants.sep_names.thick`
 ---| `constants.sep_names.slant`
 ---| `constants.sep_names.slope`
 ---| `constants.sep_names.padded_slant`
 
----@alias DeviconColors
+---@alias ZTabDeviconColors
 ---| "true"
 ---| "false"
 ---| "selected"
@@ -17,33 +17,34 @@
 ---@field left_sep boolean
 ---@field right_sep boolean
 
----@class HighlightGroup
+---@class ZTabHighlightGroup
 ---@field fg string
 ---@field bg string
 ---@field sp string?
 ---@field underline boolean?
 
----@class SetupOpts
----@field sep_name SeparatorNames?
+---@class ZTabSetupOpts
+---@field sep_name ZTabSeparatorNames?
 ---@field left_sep boolean
 ---@field right_sep boolean
----@field devicon_colors DeviconColors
----@field highlight HighlightOpts?
+---@field devicon_colors ZTabDeviconColors
+---@field highlight ZTabHighlightOpts?
 
----@class HighlightOpts
----@field ["separator"] HighlightGroup?
----@field ["separator_sel"] HighlightGroup?
----@field ["title"] HighlightGroup?
----@field ["title_sel"] HighlightGroup?
----@field ["modified"] HighlightGroup?
----@field ["modified_sel"] HighlightGroup?
----@field ["icon"] HighlightGroup?
----@field ["icon_sel"] HighlightGroup?
----@field ["fill"] HighlightGroup?
+---@class ZTabHighlightOpts
+---@field ["separator"] ZTabHighlightGroup?
+---@field ["separator_sel"] ZTabHighlightGroup?
+---@field ["title"] ZTabHighlightGroup?
+---@field ["title_sel"] ZTabHighlightGroup?
+---@field ["modified"] ZTabHighlightGroup?
+---@field ["modified_sel"] ZTabHighlightGroup?
+---@field ["icon"] ZTabHighlightGroup?
+---@field ["icon_sel"] ZTabHighlightGroup?
+---@field ["fill"] ZTabHighlightGroup?
 
----@class ConfigType
----@field sep_name SeparatorNames
+---@class ZTabConfig
+---@field sep_name ZTabSeparatorNames
 ---@field left_sep boolean
 ---@field right_sep boolean
----@field devicon_colors DeviconColors
----@field highlight HighlightOpts
+---@field devicon_colors ZTabDeviconColors
+---@field highlight ZTabHighlightOpts
+---@field opts table

@@ -38,7 +38,7 @@ end
 
 ---Create highlight group for the highlight_tag with prefix added,
 ---if the group doesn't already exist, and return the group name
----@param color HighlightGroup #Highlight group information
+---@param color ZTabHighlightGroup #Highlight group information
 ---@param highlight_tag string #Highlight group name without prefix
 ---@return string #Complete highlight group name
 M.create_component_highlight_group = function(color, highlight_tag)
@@ -60,7 +60,7 @@ M.create_component_highlight_group = function(color, highlight_tag)
 end
 
 --- Update highlight group for the highlight_tag with prefix added and return the group name
----@param color HighlightGroup #Highlight group information
+---@param color ZTabHighlightGroup #Highlight group information
 ---@param highlight_tag string #Highlight group name without prefix
 ---@return string #Complete highlight group name
 M.update_component_highlight_group = function(color, highlight_tag)
@@ -84,7 +84,7 @@ end
 
 --- Get colors from a highlight group and return them
 ---@param color_group string #Highlight group name
----@return HighlightGroup #Returns highlight group color information
+---@return ZTabHighlightGroup #Returns highlight group color information
 M.extract_highlight_colors = function(color_group)
   local rtrn = { bg = "", fg = "" }
   if vim.fn.hlexists(color_group) == 0 then
@@ -115,69 +115,67 @@ M.default_hl = function()
   local defaultselhl = M.extract_highlight_colors("TabLineSel")
   defaultselhl = vim.tbl_deep_extend("force", defaultcols, defaultselhl)
 
-  print("norm")
-  P(normhl)
-  print("def")
-  P(defaulthl)
-  print("fill")
-  P(defaultfillhl)
-  print("sel")
-  P(defaultselhl)
+  local fillcol = defaultfillhl
+  local inactivecol = defaulthl
+  local activecol = defaultselhl
+  if defaulthl.bg == defaultselhl.bg then
+    activecol = normhl
+  end
 
-  ---@type HighlightOpts
+  ---@type ZTabHighlightOpts
   local rtrn = {
-    ["separator"] = {
-      fg = defaultfillhl.bg,
-      bg = defaulthl.bg,
-      sp = defaulthl.fg,
+        ["separator"] = {
+      fg = fillcol.bg,
+      bg = inactivecol.bg,
+      sp = inactivecol.fg,
       underline = false,
     },
-    ["separator_sel"] = {
-      fg = defaultfillhl.bg,
-      bg = defaultselhl.bg,
-      sp = defaulthl.bg,
+        ["separator_sel"] = {
+      fg = fillcol.bg,
+      bg = activecol.bg,
+      sp = activecol.fg,
       underline = false,
     },
-    ["title"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-      sp = defaulthl.fg,
+        ["title"] = {
+      fg = inactivecol.fg,
+      bg = inactivecol.bg,
+      sp = inactivecol.fg,
       underline = false,
     },
-    ["title_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-      sp = defaultselhl.fg,
-      underline = true,
-    },
-    ["modified"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-      sp = defaulthl.fg,
+        ["title_sel"] = {
+      fg = activecol.fg,
+      bg = activecol.bg,
+      sp = activecol.fg,
       underline = false,
     },
-    ["modified_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-      sp = defaultselhl.fg,
+        ["modified"] = {
+      fg = inactivecol.fg,
+      bg = inactivecol.bg,
+      sp = inactivecol.fg,
       underline = false,
     },
-    ["icon"] = {
-      fg = defaulthl.fg,
-      bg = defaulthl.bg,
-      sp = defaulthl.fg,
+        ["modified_sel"] = {
+      fg = activecol.fg,
+      bg = activecol.bg,
+      sp = activecol.fg,
       underline = false,
     },
-    ["icon_sel"] = {
-      fg = defaultselhl.fg,
-      bg = defaultselhl.bg,
-      sp = defaultselhl.fg,
+        ["icon"] = {
+      fg = inactivecol.fg,
+      bg = inactivecol.bg,
+      sp = inactivecol.fg,
       underline = false,
     },
-    ["fill"] = {
-      fg = defaultfillhl.fg,
-      bg = defaultfillhl.bg,
-      sp = defaultfillhl.fg,
+        ["icon_sel"] = {
+      fg = activecol.fg,
+      bg = activecol.bg,
+      sp = activecol.fg,
+      underline = false,
+    },
+        ["fill"] = {
+      fg = fillcol.fg,
+      bg = fillcol.bg,
+      sp = fillcol.fg,
       underline = false,
     },
   }

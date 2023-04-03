@@ -1,5 +1,3 @@
----@diagnostic disable: unused-local
-
 require("ztab.types")
 
 local constants = require("ztab.constants")
@@ -20,7 +18,7 @@ end
 ---------------------------------------------------------------------------//
 -- Default Config
 ---------------------------------------------------------------------------//
----@type ConfigType
+---@type ZTabConfig
 M.__config = {
   sep_name = constants.sep_names.thick,
   left_sep = true,
@@ -114,7 +112,7 @@ M.devicon = function(bufnr, isSelected)
       colors = h.extract_highlight_colors(hl_name) or defaultcol
     end
 
-    P(M.__config.highlight[constants.highlight_vars[hl_name]].sp)
+    -- P(M.__config.highlight[constants.highlight_vars[hl_name]].sp)
 
     local bghl = h.extract_highlight_colors(hl_name)
     if bghl ~= nil then
@@ -144,7 +142,7 @@ M.separator = function(index, sel, side)
     return ""
   end
   local hl = highlight.get_hl_name(constants.highlight_names.separator, sel)
-  local last = index == vim.fn.tabpagenr("$")
+  -- local last = index == vim.fn.tabpagenr("$")
   local first = index == 1
   local sep = ""
 
@@ -215,7 +213,7 @@ local tabline = function()
   return line
 end
 
----@param highlights HighlightOpts #Highlight option fields
+---@param highlights ZTabHighlightOpts #Highlight option fields
 ---@return nil
 M.theme_update = function(highlights)
   if highlights then
@@ -223,7 +221,7 @@ M.theme_update = function(highlights)
   end
   for i, hlgrp in pairs(M.__config.highlight) do
     if constants.highlight_names[i] then
-      local hl = highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
     end
   end
 end
@@ -231,7 +229,7 @@ end
 ---------------------------------------------------------------------------//
 -- Setup Function
 ---------------------------------------------------------------------------//
----@param opts SetupOpts? #Setup options
+---@param opts ZTabSetupOpts? #Setup options
 ---@return table #Return entire module
 local setup = function(opts)
   if opts then
@@ -253,15 +251,14 @@ local setup = function(opts)
     end
     -- Merge the default configuration and the one provided by the user
     if opts.highlight then
-      print("highlights")
       M.__config.opts.highlight = opts.highlight
-      local high = M.__config.highlight
-      if high ~= nil then
-        for i, hlgrp in pairs(high) do
-          print(i)
-          P(hlgrp)
-        end
-      end
+      -- local high = M.__config.highlight
+      -- if high ~= nil then
+      --   for i, hlgrp in pairs(high) do
+      --     print(i)
+      --     P(hlgrp)
+      --   end
+      -- end
       M.__config.highlight = vim.tbl_deep_extend("keep", M.__config.opts.highlight, M.__config.highlight)
     end
   end
@@ -269,11 +266,9 @@ local setup = function(opts)
   print("highlight config")
   P(M.__config.highlight)
 
-  print("grpadd \n")
   for i, hlgrp in pairs(M.__config.highlight) do
     if constants.highlight_names[i] then
-      -- TODO change to highlight.create_component_highlight_group() when testing is done
-      local hl = highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
     end
   end
 
@@ -282,13 +277,11 @@ local setup = function(opts)
 end
 
 M.create_hl_groups = function()
-  print("creating groups")
   M.__config.highlight = highlight.default_hl()
   setup(M.__config.opts)
   for i, hlgrp in pairs(M.__config.highlight) do
     if constants.highlight_names[i] then
-      -- TODO change to highlight.create_component_highlight_group() when testing is done
-      local hl = highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
     end
   end
 end
