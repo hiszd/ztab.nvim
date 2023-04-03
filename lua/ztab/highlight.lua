@@ -103,7 +103,7 @@ M.extract_highlight_colors = function(color_group)
   return rtrn
 end
 
-M.default_hl = function()
+M.defaulthlcols = function()
   local defaultcols = { bg = "#FFFFFF", fg = "#000000" }
 
   local normhl = M.extract_highlight_colors("Normal")
@@ -121,6 +121,15 @@ M.default_hl = function()
   if defaulthl.bg == defaultselhl.bg then
     activecol = normhl
   end
+
+  return { fillcol = fillcol, inactivecol = inactivecol, activecol = activecol }
+end
+
+M.default_hl = function()
+  local defhl = M.defaulthlcols()
+  local fillcol = defhl.fillcol
+  local inactivecol = defhl.inactivecol
+  local activecol = defhl.activecol
 
   ---@type ZTabHighlightOpts
   local rtrn = {

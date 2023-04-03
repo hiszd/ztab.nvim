@@ -148,7 +148,10 @@ M.separator = function(index, sel, side)
 
   if side == "left" then
     sep = constants.sep_chars[M.__config.sep_name][2]
-    if first and M.__config.sep_name == constants.sep_names.slant then
+    if
+        first and M.__config.sep_name == constants.sep_names.slant
+        or first and M.__config.sep_name == constants.sep_names.slope
+    then
       return highlight.hl(hl) .. ""
     end
     return highlight.hl(hl) .. sep
@@ -252,14 +255,8 @@ local setup = function(opts)
     -- Merge the default configuration and the one provided by the user
     if opts.highlight then
       M.__config.opts.highlight = opts.highlight
-      -- local high = M.__config.highlight
-      -- if high ~= nil then
-      --   for i, hlgrp in pairs(high) do
-      --     print(i)
-      --     P(hlgrp)
-      --   end
-      -- end
       M.__config.highlight = vim.tbl_deep_extend("keep", M.__config.opts.highlight, M.__config.highlight)
+      M.__config.highlight = M.typed_highlights(M.__config.highlight)
     end
   end
 
@@ -284,6 +281,34 @@ M.create_hl_groups = function()
       highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
     end
   end
+end
+
+---@param h ZTabHighlightOpts
+---@return ZTabHighlightOpts
+M.typed_highlights = function(h)
+  local defcol = highlight.defaulthlcols()
+  local reptab = {
+        ["activecol.fg"] = defcol.activecol.fg,
+        ["activecol.bg"] = defcol.activecol.bg,
+        ["inactivecol.fg"] = defcol.inactivecol.fg,
+        ["inactivecol.bg"] = defcol.inactivecol.bg,
+        ["fillcol.fg"] = defcol.fillcol.fg,
+        ["fillcol.bg"] = defcol.fillcol.bg,
+  }
+  for i, hlgrp in pairs(h) do
+    for r, col in pairs(reptab) do
+      if hlgrp.fg == r then
+        h[i].fg = col
+      end
+      if hlgrp.bg == r then
+        h[i].bg = col
+      end
+      if hlgrp.sp == r then
+        h[i].sp = col
+      end
+    end
+  end
+  return h
 end
 
 return {

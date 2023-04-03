@@ -16,11 +16,19 @@
 ---@class CellOpts
 ---@field left_sep boolean
 ---@field right_sep boolean
+--
+---@alias ZTabColorInput
+---| "activecol.fg"
+---| "activecol.bg"
+---| "inactivecol.fg"
+---| "inactivecol.bg"
+---| "fillcol.fg"
+---| "fillcol.bg"
 
 ---@class ZTabHighlightGroup
----@field fg string
----@field bg string
----@field sp string?
+---@field fg ZTabColorInput | string
+---@field bg ZTabColorInput | string
+---@field sp ZTabColorInput | string?
 ---@field underline boolean?
 
 ---@class ZTabSetupOpts
