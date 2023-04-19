@@ -74,6 +74,10 @@ local setup = function(opts)
       M.__config.opts.tabline = opts.tabline
       M.__config.tabline = opts.tabline
     end
+    if opts.bufline then
+      M.__config.opts.bufline = opts.bufline
+      M.__config.bufline = opts.bufline
+    end
   end
 
   -- print("highlight config")
@@ -85,12 +89,13 @@ local setup = function(opts)
     end
   end
 
-  if opts and opts.tabline == true then
+  if M.__config.tabline then
     vim.opt.tabline = "%!v:lua.require'ztab.tabline'()"
   end
-  if opts and opts.bufline == true then
+  if M.__config.bufline then
     vim.opt.winbar = "%!v:lua.require'ztab.bufline'()"
   end
+
   return M
 end
 
@@ -109,12 +114,12 @@ end
 M.typed_highlights = function(h)
   local defcol = highlight.defaulthlcols()
   local reptab = {
-    ["activecol.fg"] = defcol.activecol.fg,
-    ["activecol.bg"] = defcol.activecol.bg,
-    ["inactivecol.fg"] = defcol.inactivecol.fg,
-    ["inactivecol.bg"] = defcol.inactivecol.bg,
-    ["fillcol.fg"] = defcol.fillcol.fg,
-    ["fillcol.bg"] = defcol.fillcol.bg,
+        ["activecol.fg"] = defcol.activecol.fg,
+        ["activecol.bg"] = defcol.activecol.bg,
+        ["inactivecol.fg"] = defcol.inactivecol.fg,
+        ["inactivecol.bg"] = defcol.inactivecol.bg,
+        ["fillcol.fg"] = defcol.fillcol.fg,
+        ["fillcol.bg"] = defcol.fillcol.bg,
   }
   for i, hlgrp in pairs(h) do
     for r, col in pairs(reptab) do
