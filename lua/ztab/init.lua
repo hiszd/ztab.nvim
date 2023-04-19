@@ -93,7 +93,7 @@ local setup = function(opts)
     vim.opt.tabline = "%!v:lua.require'ztab.tabline'()"
   end
   if M.__config.bufline then
-    vim.opt.winbar = "%!v:lua.require'ztab.bufline'()"
+    vim.opt.winbar = "%!v:lua.require'ztab.bufline'.draw()"
   end
 
   return M

@@ -1,6 +1,13 @@
--- Same autocommand written with a Lua function instead
-vim.api.nvim_create_autocmd("ColorScheme", {
-  callback = function()
-    require("ztab").helpers.create_hl_groups()
+vim.api.nvim_create_autocmd("BufDelete", {
+  callback = function(info)
+    require("ztab.bufline")._private.remnbuf(info.buf)
+    vim.cmd("redrawstatus")
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufAdd", {
+  callback = function(info)
+    require("ztab.bufline")._private.addbuf(info.buf)
+    vim.cmd("redrawstatus")
   end,
 })

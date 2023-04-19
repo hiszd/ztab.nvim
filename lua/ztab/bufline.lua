@@ -3,6 +3,98 @@ require("ztab.types")
 local constants = require("ztab.constants")
 local highlight = require("ztab.highlight")
 
+---@type table
+local M = {}
+
+M.store = {
+  ---@type table<number, number>
+  bufs = {},
+  ---@type number
+  bufcount = 0,
+}
+
+---@param bufs table
+M.updatebufs = function(bufs)
+  M.store.bufs = bufs
+  local count = 0
+  for _ in pairs(bufs) do
+    count = count + 1
+  end
+  M.store.bufcount = count
+end
+
+---@param nbuf number #ztab buffer
+M.remnbuf = function(nbuf)
+  local zbuf = M.getzbuf(nbuf)
+  table.remove(M.store.bufs, zbuf)
+  M.store.bufcount = M.store.bufcount - 1
+end
+
+---@param zbuf number #ztab buffer
+M.remzbuf = function(zbuf)
+  table.remove(M.store.bufs, zbuf)
+  M.store.bufcount = M.store.bufcount - 1
+end
+
+---@param nbuf number
+M.addbuf = function(nbuf)
+  local len = M.store.bufcount
+  -- M.store.bufs[len + 1] = nbuf
+  table.insert(M.store.bufs, len + 1, nbuf)
+  M.store.bufcount = M.store.bufcount + 1
+
+  print("zbufs")
+  P(M.store.bufs)
+end
+
+---Return ztab buffer tab number from nvim buffer number
+---@param nvimbuf number #nvim buffer number
+---@return number | nil #ztab buffer tab number
+M.getzbuf = function(nvimbuf)
+  for zbuf, buf in pairs(M.store.bufs) do
+    if buf == nvimbuf then
+      -- print("zbuffer:" .. zbuf)
+      -- print("nbuffer:" .. nvimbuf)
+      return zbuf
+    end
+  end
+end
+
+---Return nvim buffer from ztab buffer tab number
+---@param ztabbuf number #ztab buffer tab number
+---@return number | nil #nvim buffer number
+M.getnbuf = function(ztabbuf)
+  ---@type number
+  local bufcount = M.store.bufcount
+  if tonumber(bufcount) >= tonumber(ztabbuf) then
+    for zb, nb in ipairs(M.store.bufs) do
+      if tonumber(zb) == tonumber(ztabbuf) then
+        return nb
+      end
+    end
+  end
+  print("without")
+  return nil
+end
+
+---@param nbuf number #The nvim buffer you want to navigate to
+local nbufgoto = function(nbuf)
+  local zbuf = M.getzbuf(nbuf)
+  if zbuf then
+    vim.api.nvim_set_current_buffer(nbuf)
+  end
+end
+
+---@param zbuf number #The ztab buffer tab you want to navigate to
+local zbufgoto = function(zbuf)
+  local nbuf = M.getnbuf(zbuf)
+  print("berts")
+  print(nbuf)
+  if nbuf then
+    vim.api.nvim_set_current_buf(nbuf)
+  end
+end
+
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return spacer with highlights
 local spacer = function(isSelected)
@@ -44,7 +136,8 @@ local title = function(bufnr, isSelected)
   else
     rtrn = rtrn .. vim.fn.pathshorten(vim.fn.fnamemodify(file, ":p:~:t"))
   end
-  return rtrn
+  local bufthg = M.getzbuf(bufnr)
+  return bufthg and (bufthg .. ". ") or "" .. rtrn
 end
 
 --- Get tab modified content
@@ -145,14 +238,12 @@ local separator = function(index, sel, side)
 end
 
 ---Produce the tab cell
----@param index number #Tab index
+---@param ztab number #Tab index
 ---@return string #Tab cell
-local cell = function(index)
+local cell = function(ztab)
   local con = require("ztab").helpers.__config
-  local isSelected = vim.fn.tabpagenr() == index
-  local buflist = vim.fn.tabpagebuflist(index)
-  local winnr = vim.fn.tabpagewinnr(index)
-  local bufnr = buflist[winnr]
+  local bufnr = M.getnbuf(ztab) and M.getnbuf(ztab) or 0
+  local isSelected = vim.api.nvim_get_current_buf() == bufnr
   local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
   local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
 
@@ -160,11 +251,11 @@ local cell = function(index)
 
   local ret = ""
   if con.left_sep then
-    ret = ret .. separator(index, isSelected, "left")
+    ret = ret .. separator(ztab, isSelected, "left")
   end
   ret = ret
       .. "%"
-      .. index
+      .. ztab
       .. "T"
       .. spacing
       .. title(bufnr, isSelected)
@@ -173,29 +264,58 @@ local cell = function(index)
       .. devicon(bufnr, isSelected)
       .. "%T"
   if con.right_sep then
-    ret = ret .. separator(index, isSelected, "right")
+    ret = ret .. separator(bufnr, isSelected, "right")
   end
   ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill))
 
   return ret
 end
 
+---@param bufnr number #Buffer number to run filter on
+---@return boolean #true = pass, false = fail
+local buffilter = function(bufnr)
+  local ft = vim.fn.getbufvar(bufnr, "&filetype")
+  if ft == "" or nil then
+    return false
+  end
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    return false
+  end
+
+  return true
+end
+
 ---------------------------------------------------------------------------//
--- Tabline Constructor
+-- Bufline Constructor
 ---------------------------------------------------------------------------//
----@return string #Returns the tabline
+---@return string #Returns the bufline
 local bufline = function()
   local line = ""
-  for i = 1, vim.fn.tabpagenr("$"), 1 do
+  local buflist = vim.api.nvim_list_bufs()
+  for buf, i in ipairs(buflist) do
+    if buffilter(buf) and tonumber(buf) > 1 then
+      if not M.getzbuf(buf) then
+        print("buf " .. buf)
+        print("i " .. i)
+        M.addbuf(buf)
+      end
+    end
+  end
+  for i = 1, M.store.bufcount, 1 do
     line = line .. cell(i)
   end
   -- fill the rest with this hl group
   line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%="
-  if vim.fn.tabpagenr("$") > 1 then
+  if #buflist > 1 then
     -- end the line with this terminator
     line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%999XX"
   end
   return line
 end
 
-return bufline
+return {
+  _private = M,
+  draw = bufline,
+  zbufgoto = zbufgoto,
+  nbufgoto = nbufgoto,
+}
