@@ -37,6 +37,8 @@
 ---@field right_sep boolean
 ---@field devicon_colors ZTabDeviconColors
 ---@field highlight ZTabHighlightOpts?
+---@field tabline boolean?
+---@field bufline boolean?
 
 ---@class ZTabHighlightOpts
 ---@field ["separator"] ZTabHighlightGroup?
@@ -55,4 +57,4 @@
 ---@field right_sep boolean
 ---@field devicon_colors ZTabDeviconColors
 ---@field highlight ZTabHighlightOpts
----@field opts table
+---@field opts ZTabSetupOpts
