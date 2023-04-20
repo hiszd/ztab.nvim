@@ -136,8 +136,7 @@ local title = function(bufnr, isSelected)
   else
     rtrn = rtrn .. vim.fn.pathshorten(vim.fn.fnamemodify(file, ":p:~:t"))
   end
-  local bufthg = M.getzbuf(bufnr)
-  return bufthg and (bufthg .. ". ") or "" .. rtrn
+  return rtrn
 end
 
 --- Get tab modified content
@@ -254,15 +253,11 @@ local cell = function(ztab)
     ret = ret .. separator(ztab, isSelected, "left")
   end
   ret = ret
-      .. "%"
-      .. ztab
-      .. "T"
       .. spacing
       .. title(bufnr, isSelected)
       .. spacing
       .. modified(bufnr, isSelected)
       .. devicon(bufnr, isSelected)
-      .. "%T"
   if con.right_sep then
     ret = ret .. separator(bufnr, isSelected, "right")
   end
@@ -275,10 +270,14 @@ end
 ---@return boolean #true = pass, false = fail
 local buffilter = function(bufnr)
   local ft = vim.fn.getbufvar(bufnr, "&filetype")
+  local hidden = vim.fn.getbufinfo(bufnr)[1].hidden == 1
   if ft == "" or nil then
     return false
   end
   if not vim.api.nvim_buf_is_loaded(bufnr) then
+    return false
+  end
+  if hidden then
     return false
   end
 
@@ -291,25 +290,11 @@ end
 ---@return string #Returns the bufline
 local bufline = function()
   local line = ""
-  local buflist = vim.api.nvim_list_bufs()
-  for buf, i in ipairs(buflist) do
-    if buffilter(buf) and tonumber(buf) > 1 then
-      if not M.getzbuf(buf) then
-        print("buf " .. buf)
-        print("i " .. i)
-        M.addbuf(buf)
-      end
-    end
-  end
   for i = 1, M.store.bufcount, 1 do
     line = line .. cell(i)
   end
   -- fill the rest with this hl group
   line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%="
-  if #buflist > 1 then
-    -- end the line with this terminator
-    line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%999XX"
-  end
   return line
 end
 
