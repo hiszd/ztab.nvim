@@ -31,14 +31,17 @@
 ---@field sp ZTabColorInput | string?
 ---@field underline boolean?
 
----@class ZTabSetupOpts
+---@class ZElSetupOpts
+---@field enabled boolean?
 ---@field sep_name ZTabSeparatorNames?
 ---@field left_sep boolean
 ---@field right_sep boolean
 ---@field devicon_colors ZTabDeviconColors
 ---@field highlight ZTabHighlightOpts?
----@field tabline boolean?
----@field bufline boolean?
+
+---@class ZSetupOpts
+---@field bufline ZElSetupOpts
+---@field tabline ZElSetupOpts
 
 ---@class ZTabHighlightOpts
 ---@field ["separator"] ZTabHighlightGroup?
@@ -51,10 +54,14 @@
 ---@field ["icon_sel"] ZTabHighlightGroup?
 ---@field ["fill"] ZTabHighlightGroup?
 
----@class ZTabConfig
+---@class ZElConfig
 ---@field sep_name ZTabSeparatorNames
 ---@field left_sep boolean
 ---@field right_sep boolean
 ---@field devicon_colors ZTabDeviconColors
 ---@field highlight ZTabHighlightOpts
----@field opts ZTabSetupOpts
+
+---@class ZConfig
+---@field tabline ZElConfig
+---@field bufline ZElConfig
+---@field opts ZSetupOpts

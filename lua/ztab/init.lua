@@ -7,24 +7,39 @@ local highlight = require("ztab.highlight")
 local M = {}
 
 ---------------------------------------------------------------------------//
--- Default Config
+-- Default Tab Config
 ---------------------------------------------------------------------------//
----@type ZTabConfig
+---@type ZConfig
 M.__config = {
-  sep_name = constants.sep_names.thick,
-  left_sep = true,
-  right_sep = false,
-  devicon_colors = "selected",
-  highlight = highlight.default_hl(),
-  tabline = true,
-  bufline = false,
-  opts = {
-    highlight = {},
+  tabline = {
+    enabled = true,
     sep_name = constants.sep_names.thick,
     left_sep = true,
     right_sep = false,
-    tabline = true,
-    bufline = false,
+    devicon_colors = "selected",
+    highlight = highlight.default_hl(),
+  },
+  bufline = {
+    enabled = false,
+    sep_name = constants.sep_names.thick,
+    left_sep = true,
+    right_sep = false,
+    devicon_colors = "selected",
+    highlight = highlight.default_hl(),
+  },
+  opts = {
+    tabline = {
+      highlight = {},
+      sep_name = constants.sep_names.thick,
+      left_sep = true,
+      right_sep = false,
+    },
+    bufline = {
+      highlight = {},
+      sep_name = constants.sep_names.thick,
+      left_sep = true,
+      right_sep = false,
+    },
   },
 }
 
@@ -44,55 +59,90 @@ end
 ---------------------------------------------------------------------------//
 -- Setup Function
 ---------------------------------------------------------------------------//
----@param opts ZTabSetupOpts? #Setup options
+---@param opts ZSetupOpts? #Setup options
 ---@return table #Return entire module
 local setup = function(opts)
   if opts then
-    if opts.sep_name then
-      M.__config.opts.sep_name = opts.sep_name
-      M.__config.sep_name = opts.sep_name
+    local b = opts.bufline and true or false
+    local t = opts.tabline and true or false
+    if b then
+      if opts.bufline.sep_name then
+        M.__config.opts.bufline.sep_name = opts.bufline.sep_name
+        M.__config.bufline.sep_name = opts.bufline.sep_name
+      end
+      if opts.bufline.left_sep then
+        M.__config.opts.bufline.left_sep = opts.bufline.left_sep
+        M.__config.bufline.left_sep = opts.bufline.left_sep
+      end
+      if opts.bufline.right_sep then
+        M.__config.opts.bufline.right_sep = opts.bufline.right_sep
+        M.__config.right_sep = opts.bufline.right_sep
+      end
+      if opts.bufline.devicon_colors then
+        M.__config.opts.bufline.devicon_colors = opts.bufline.devicon_colors
+        M.__config.bufline.devicon_colors = opts.bufline.devicon_colors
+      end
+      -- Merge the default configuration and the one provided by the user
+      if opts.bufline.highlight then
+        M.__config.opts.bufline.highlight = opts.bufline.highlight
+        M.__config.bufline.highlight =
+            vim.tbl_deep_extend("keep", M.__config.opts.bufline.highlight, M.__config.bufline.highlight)
+        M.__config.bufline.highlight = M.typed_highlights(M.__config.bufline.highlight)
+      end
+      if opts.bufline.enabled then
+        M.__config.opts.bufline.enabled = opts.bufline.enabled
+        M.__config.bufline.enabled = opts.bufline.enabled
+      end
     end
-    if opts.left_sep then
-      M.__config.opts.left_sep = opts.left_sep
-      M.__config.left_sep = opts.left_sep
-    end
-    if opts.right_sep then
-      M.__config.opts.right_sep = opts.right_sep
-      M.__config.right_sep = opts.right_sep
-    end
-    if opts.devicon_colors then
-      M.__config.opts.devicon_colors = opts.devicon_colors
-      M.__config.devicon_colors = opts.devicon_colors
-    end
-    -- Merge the default configuration and the one provided by the user
-    if opts.highlight then
-      M.__config.opts.highlight = opts.highlight
-      M.__config.highlight = vim.tbl_deep_extend("keep", M.__config.opts.highlight, M.__config.highlight)
-      M.__config.highlight = M.typed_highlights(M.__config.highlight)
-    end
-    if opts.tabline then
-      M.__config.opts.tabline = opts.tabline
-      M.__config.tabline = opts.tabline
-    end
-    if opts.bufline then
-      M.__config.opts.bufline = opts.bufline
-      M.__config.bufline = opts.bufline
+    if t then
+      if opts.tabline.sep_name then
+        M.__config.opts.tabline.sep_name = opts.tabline.sep_name
+        M.__config.tabline.sep_name = opts.tabline.sep_name
+      end
+      if opts.tabline.left_sep then
+        M.__config.opts.tabline.left_sep = opts.tabline.left_sep
+        M.__config.tabline.left_sep = opts.tabline.left_sep
+      end
+      if opts.tabline.right_sep then
+        M.__config.opts.tabline.right_sep = opts.tabline.right_sep
+        M.__config.right_sep = opts.tabline.right_sep
+      end
+      if opts.tabline.devicon_colors then
+        M.__config.opts.tabline.devicon_colors = opts.tabline.devicon_colors
+        M.__config.tabline.devicon_colors = opts.tabline.devicon_colors
+      end
+      -- Merge the default configuration and the one provided by the user
+      if opts.tabline.highlight then
+        M.__config.opts.tabline.highlight = opts.tabline.highlight
+        M.__config.tabline.highlight =
+            vim.tbl_deep_extend("keep", M.__config.opts.tabline.highlight, M.__config.tabline.highlight)
+        M.__config.tabline.highlight = M.typed_highlights(M.__config.tabline.highlight)
+      end
+      if opts.tabline.enabled then
+        M.__config.opts.tabline.enabled = opts.tabline.enabled
+        M.__config.tabline.enabled = opts.tabline.enabled
+      end
     end
   end
 
   -- print("highlight config")
   -- P(M.__config.highlight)
 
-  for i, hlgrp in pairs(M.__config.highlight) do
+  for i, hlgrp in pairs(M.__config.tabline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], false, true)
+    end
+  end
+  for i, hlgrp in pairs(M.__config.bufline.highlight) do
+    if constants.highlight_names[i] then
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false)
     end
   end
 
-  if M.__config.tabline then
+  if M.__config.tabline.enabled then
     vim.opt.tabline = "%!v:lua.require'ztab.tabline'()"
   end
-  if M.__config.bufline then
+  if M.__config.bufline.enabled then
     vim.opt.winbar = "%!v:lua.require'ztab.bufline'.draw()"
   end
 
@@ -100,11 +150,17 @@ local setup = function(opts)
 end
 
 M.create_hl_groups = function()
-  M.__config.highlight = highlight.default_hl()
+  M.__config.tabline.highlight = highlight.default_hl()
+  M.__config.bufline.highlight = highlight.default_hl()
   setup(M.__config.opts)
-  for i, hlgrp in pairs(M.__config.highlight) do
+  for i, hlgrp in pairs(M.__config.tabline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], false, true)
+    end
+  end
+  for i, hlgrp in pairs(M.__config.bufline.highlight) do
+    if constants.highlight_names[i] then
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false)
     end
   end
 end

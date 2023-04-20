@@ -10,6 +10,13 @@ local PREFIX = "ZTab"
 M.PREFIX = PREFIX
 
 ---@type string
+local ADDPFIXBuf = "Buf"
+M.ADDPFIXBuf = ADDPFIXBuf
+---@type string
+local ADDPFIXTab = "Tab"
+M.ADDPFIXTab = ADDPFIXTab
+
+---@type string
 M.indicator = "▎"
 
 ---@type table<string, string>

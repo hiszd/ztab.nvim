@@ -178,9 +178,9 @@ local devicon = function(bufnr, isSelected)
     local defaultcol = { fg = "fg", bg = "bg" }
     local colors = defaultcol
     colors = h.extract_highlight_colors((isSelected and devhl or hl_name)) or defaultcol
-    if con.devicon_colors == "true" then
+    if con.bufline.devicon_colors == "true" then
       colors = h.extract_highlight_colors(devhl) or defaultcol
-    elseif con.devicon_colors == "false" then
+    elseif con.bufline.devicon_colors == "false" then
       colors = h.extract_highlight_colors(hl_name) or defaultcol
     end
 
@@ -193,8 +193,8 @@ local devicon = function(bufnr, isSelected)
     local hl = h.update_component_highlight_group({
       bg = colors.bg,
       fg = colors.fg,
-      sp = con.highlight[constants.highlight_vars[hl_name]].sp,
-      underline = con.highlight[constants.highlight_vars[hl_name]].underline,
+      sp = con.bufline.highlight[constants.highlight_vars[hl_name]].sp,
+      underline = con.bufline.highlight[constants.highlight_vars[hl_name]].underline,
     }, h.get_hl_name(devhl, isSelected, false))
     -- P("hl: " .. (hl or '') .. ' and ' .. h.get_hl_name(devhl, isSelected, false))
     local selectedHlStart = h.hl(hl)
