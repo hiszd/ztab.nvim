@@ -16,7 +16,7 @@
 ---@class CellOpts
 ---@field left_sep boolean
 ---@field right_sep boolean
---
+
 ---@alias ZTabColorInput
 ---| "activecol.fg"
 ---| "activecol.bg"
@@ -31,7 +31,7 @@
 ---@field sp ZTabColorInput | string?
 ---@field underline boolean?
 
----@class ZElSetupOpts
+---@class ZTabSetupOpts
 ---@field enabled boolean?
 ---@field sep_name ZTabSeparatorNames?
 ---@field left_sep boolean
@@ -39,9 +39,18 @@
 ---@field devicon_colors ZTabDeviconColors
 ---@field highlight ZTabHighlightOpts?
 
+---@class ZBufSetupOpts
+---@field enabled boolean?
+---@field sep_name ZTabSeparatorNames?
+---@field left_sep boolean
+---@field right_sep boolean
+---@field devicon_colors ZTabDeviconColors
+---@field highlight ZTabHighlightOpts?
+---@field wtabhighlight ZTabHighlightOpts?
+
 ---@class ZSetupOpts
----@field bufline ZElSetupOpts
----@field tabline ZElSetupOpts
+---@field bufline ZBufSetupOpts
+---@field tabline ZTabSetupOpts
 
 ---@class ZTabHighlightOpts
 ---@field ["separator"] ZTabHighlightGroup?

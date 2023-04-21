@@ -31,17 +31,21 @@ M.get_hl_name = function(hl_name, sel, pfix, buf, tab)
   if sel then
     if pfix == false then
       return hl_name .. (sel and constants.hl_appends["selected"] or "")
-    else
+    elseif pfix == true and addprefix ~= "" then
       return table.concat(
         { constants.PREFIX, addprefix, hl_name .. (sel and constants.hl_appends["selected"] or "") },
         "_"
       )
+    else
+      return table.concat({ constants.PREFIX, hl_name .. (sel and constants.hl_appends["selected"] or "") }, "_")
     end
   else
     if pfix == false then
       return hl_name
-    else
+    elseif pfix == true and addprefix ~= "" then
       return table.concat({ constants.PREFIX, addprefix, hl_name }, "_")
+    else
+      return table.concat({ constants.PREFIX, hl_name }, "_")
     end
   end
 end
@@ -82,15 +86,27 @@ end
 --- Update highlight group for the highlight_tag with prefix added and return the group name
 ---@param color ZTabHighlightGroup #Highlight group information
 ---@param highlight_tag string #Highlight group name without prefix
+---@param pfix boolean? #General prefix
 ---@param buf boolean? #Buffer prefix
 ---@param tab boolean? #Tabline prefix
 ---@return string #Complete highlight group name
-M.update_component_highlight_group = function(color, highlight_tag, buf, tab)
+M.update_component_highlight_group = function(color, highlight_tag, pfix, buf, tab)
   if color.bg ~= nil and color.fg ~= nil then
-    local highlight_group_name = table.concat(
-      { constants.PREFIX, addpfix(buf and true or false, tab and true or false), highlight_tag },
-      "_"
-    )
+    local addprefix = addpfix(buf and true or false, tab and true or false)
+    local highlight_group_name
+    if pfix then
+      if addprefix then
+        highlight_group_name = table.concat({ constants.PREFIX, addprefix, highlight_tag }, "_")
+      else
+        highlight_group_name = table.concat({ constants.PREFIX, highlight_tag }, "_")
+      end
+    else
+      if addprefix then
+        highlight_group_name = table.concat({ constants.PREFIX, addprefix, highlight_tag }, "_")
+      else
+        highlight_group_name = table.concat({ constants.PREFIX, highlight_tag }, "_")
+      end
+    end
     pcall(function()
       vim.api.nvim_set_hl(0, highlight_group_name, {
         fg = color.fg,

@@ -26,6 +26,7 @@ M.__config = {
     right_sep = false,
     devicon_colors = "selected",
     highlight = highlight.default_hl(),
+    wtabhighlight = highlight.default_hl(),
   },
   opts = {
     tabline = {
@@ -36,6 +37,7 @@ M.__config = {
     },
     bufline = {
       highlight = {},
+      wtabhighlight = {},
       sep_name = constants.sep_names.thick,
       left_sep = true,
       right_sep = false,
@@ -43,15 +45,24 @@ M.__config = {
   },
 }
 
----@param highlights ZTabHighlightOpts #Highlight option fields
+---@param tabhighlights ZTabHighlightOpts #Highlight option fields
+---@param bufhighlights ZTabHighlightOpts #Highlight option fields
 ---@return nil
-M.theme_update = function(highlights)
-  if highlights then
-    M.__config.highlight = vim.tbl_deep_extend("keep", highlights, M.__config.highlight)
+M.theme_update = function(tabhighlights, bufhighlights)
+  if tabhighlights then
+    M.__config.tabline.highlight = vim.tbl_deep_extend("keep", tabhighlights, M.__config.tabline.highlight)
   end
-  for i, hlgrp in pairs(M.__config.highlight) do
+  if bufhighlights then
+    M.__config.bufline.highlight = vim.tbl_deep_extend("keep", bufhighlights, M.__config.bufline.highlight)
+  end
+  for i, hlgrp in pairs(M.__config.tabline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i])
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false, true)
+    end
+  end
+  for i, hlgrp in pairs(M.__config.bufline.highlight) do
+    if constants.highlight_names[i] then
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, true, false)
     end
   end
 end
@@ -76,7 +87,7 @@ local setup = function(opts)
       end
       if opts.bufline.right_sep then
         M.__config.opts.bufline.right_sep = opts.bufline.right_sep
-        M.__config.right_sep = opts.bufline.right_sep
+        M.__config.bufline.right_sep = opts.bufline.right_sep
       end
       if opts.bufline.devicon_colors then
         M.__config.opts.bufline.devicon_colors = opts.bufline.devicon_colors
@@ -88,6 +99,13 @@ local setup = function(opts)
         M.__config.bufline.highlight =
             vim.tbl_deep_extend("keep", M.__config.opts.bufline.highlight, M.__config.bufline.highlight)
         M.__config.bufline.highlight = M.typed_highlights(M.__config.bufline.highlight)
+      end
+      -- Merge the default configuration and the one provided by the user
+      if opts.bufline.wtabhighlight then
+        M.__config.opts.bufline.wtabhighlight = opts.bufline.wtabhighlight
+        M.__config.bufline.wtabhighlight =
+            vim.tbl_deep_extend("keep", M.__config.opts.bufline.wtabhighlight, M.__config.bufline.wtabhighlight)
+        M.__config.bufline.wtabhighlight = M.typed_highlights(M.__config.bufline.wtabhighlight)
       end
       if opts.bufline.enabled then
         M.__config.opts.bufline.enabled = opts.bufline.enabled
@@ -105,7 +123,7 @@ local setup = function(opts)
       end
       if opts.tabline.right_sep then
         M.__config.opts.tabline.right_sep = opts.tabline.right_sep
-        M.__config.right_sep = opts.tabline.right_sep
+        M.__config.tabline.right_sep = opts.tabline.right_sep
       end
       if opts.tabline.devicon_colors then
         M.__config.opts.tabline.devicon_colors = opts.tabline.devicon_colors
@@ -130,17 +148,17 @@ local setup = function(opts)
 
   for i, hlgrp in pairs(M.__config.tabline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], false, true)
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false, true)
     end
   end
   for i, hlgrp in pairs(M.__config.bufline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false)
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, true, false)
     end
   end
 
   if M.__config.tabline.enabled then
-    vim.opt.tabline = "%!v:lua.require'ztab.tabline'()"
+    vim.opt.tabline = "%!v:lua.require'ztab.tabline'.draw()"
   end
   if M.__config.bufline.enabled then
     vim.opt.winbar = "%!v:lua.require'ztab.bufline'.draw()"
@@ -155,12 +173,12 @@ M.create_hl_groups = function()
   setup(M.__config.opts)
   for i, hlgrp in pairs(M.__config.tabline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], false, true)
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false, true)
     end
   end
   for i, hlgrp in pairs(M.__config.bufline.highlight) do
     if constants.highlight_names[i] then
-      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, false)
+      highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, true, false)
     end
   end
 end

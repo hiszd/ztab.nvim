@@ -6,8 +6,8 @@ local highlight = require("ztab.highlight")
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return spacer with highlights
 local spacer = function(isSelected)
-  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
-  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
+  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, true, true, false, true))
+  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, false, true, false, true))
 
   return (isSelected and selhl or hl) .. " "
 end
@@ -17,7 +17,7 @@ end
 ---@param isSelected boolean #Is the tab selected?
 ---@return string #Return title component with highlights
 local title = function(bufnr, isSelected)
-  local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected)
+  local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected, true, false, true)
   local file = vim.fn.bufname(bufnr)
   local buftype = vim.fn.getbufvar(bufnr, "&buftype")
   local filetype = vim.fn.getbufvar(bufnr, "&filetype")
@@ -52,7 +52,7 @@ end
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return modified component with highlights
 local modified = function(bufnr, isSelected)
-  local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected)
+  local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected, true, false, true)
   local ret = highlight.hl(hl)
   ret = ret .. (vim.fn.getbufvar(bufnr, "&modified") == 1 and ("[+]" .. spacer(isSelected)) or "")
   return ret
@@ -82,31 +82,32 @@ local devicon = function(bufnr, isSelected)
   end
   if icon then
     local h = require("ztab.highlight")
-    local hl_name = h.get_hl_name(constants.highlight_names.icon, isSelected, true)
+    local hl_name = h.get_hl_name(constants.highlight_names.icon, isSelected)
+    local hl_name_full = h.get_hl_name(constants.highlight_names.icon, isSelected, true, false, true)
     local defaultcol = { fg = "fg", bg = "bg" }
     local colors = defaultcol
     colors = h.extract_highlight_colors((isSelected and devhl or hl_name)) or defaultcol
-    if con.devicon_colors == "true" then
+    if con.tabline.devicon_colors == "true" then
       colors = h.extract_highlight_colors(devhl) or defaultcol
-    elseif con.devicon_colors == "false" then
+    elseif con.tabline.devicon_colors == "false" then
       colors = h.extract_highlight_colors(hl_name) or defaultcol
     end
 
     -- P(M.__config.highlight[constants.highlight_vars[hl_name]].sp)
 
-    local bghl = h.extract_highlight_colors(hl_name)
+    local bghl = h.extract_highlight_colors(hl_name_full)
     if bghl ~= nil then
       colors.bg = bghl.bg or defaultcol.bg
     end
     local hl = h.update_component_highlight_group({
       bg = colors.bg,
       fg = colors.fg,
-      sp = con.highlight[constants.highlight_vars[hl_name]].sp,
-      underline = con.highlight[constants.highlight_vars[hl_name]].underline,
-    }, h.get_hl_name(devhl, isSelected, false))
+      sp = con.tabline.highlight[constants.highlight_vars[hl_name]].sp,
+      underline = con.tabline.highlight[constants.highlight_vars[hl_name]].underline,
+    }, h.get_hl_name(devhl, isSelected, false), false, false, true)
     -- P("hl: " .. (hl or '') .. ' and ' .. h.get_hl_name(devhl, isSelected, false))
     local selectedHlStart = h.hl(hl)
-    local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected))
+    local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, false, true))
     return selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
   end
   return ""
@@ -122,22 +123,22 @@ local separator = function(index, sel, side)
   if side ~= "left" and side ~= "right" then
     return ""
   end
-  local hl = highlight.get_hl_name(constants.highlight_names.separator, sel)
+  local hl = highlight.get_hl_name(constants.highlight_names.separator, sel, true, false, true)
   -- local last = index == vim.fn.tabpagenr("$")
   local first = index == 1
   local sep = ""
 
   if side == "left" then
-    sep = constants.sep_chars[con.sep_name][2]
+    sep = constants.sep_chars[con.tabline.sep_name][2]
     if
-        first and con.sep_name == constants.sep_names.slant
-        or first and con.sep_name == constants.sep_names.slope
+        first and con.tabline.sep_name == constants.sep_names.slant
+        or first and con.tabline.sep_name == constants.sep_names.slope
     then
       return highlight.hl(hl) .. ""
     end
     return highlight.hl(hl) .. sep
   elseif side == "right" then
-    sep = constants.sep_chars[con.sep_name][1]
+    sep = constants.sep_chars[con.tabline.sep_name][1]
     return highlight.hl(hl) .. sep
   end
 
@@ -153,13 +154,11 @@ local cell = function(index)
   local buflist = vim.fn.tabpagebuflist(index)
   local winnr = vim.fn.tabpagewinnr(index)
   local bufnr = buflist[winnr]
-  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
-  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
 
-  local spacing = (isSelected and selhl or hl) .. spacer(isSelected)
+  local spacing = spacer(isSelected)
 
   local ret = ""
-  if con.left_sep then
+  if con.tabline.right_sep then
     ret = ret .. separator(index, isSelected, "left")
   end
   ret = ret
@@ -170,12 +169,12 @@ local cell = function(index)
       .. title(bufnr, isSelected)
       .. spacing
       .. modified(bufnr, isSelected)
-      .. devicon(bufnr, isSelected)
+      -- .. devicon(bufnr, isSelected)
       .. "%T"
-  if con.right_sep then
+  if con.tabline.left_sep then
     ret = ret .. separator(index, isSelected, "right")
   end
-  ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill))
+  ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, false, true))
 
   return ret
 end
@@ -190,12 +189,16 @@ local tabline = function()
     line = line .. cell(i)
   end
   -- fill the rest with this hl group
-  line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%="
+  line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, false, true)) .. "%="
   if vim.fn.tabpagenr("$") > 1 then
     -- end the line with this terminator
-    line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%999XX"
+    line = line
+        .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, false, true))
+        .. "%999XX"
   end
   return line
 end
 
-return tabline
+return {
+  draw = tabline,
+}

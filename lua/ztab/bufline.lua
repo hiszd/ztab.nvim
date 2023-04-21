@@ -26,8 +26,11 @@ end
 ---@param nbuf number #ztab buffer
 M.remnbuf = function(nbuf)
   local zbuf = M.getzbuf(nbuf)
-  table.remove(M.store.bufs, zbuf)
-  M.store.bufcount = M.store.bufcount - 1
+  if zbuf ~= nil then
+    print("nbuf: " .. nbuf .. " zbuf: " .. zbuf)
+    table.remove(M.store.bufs, zbuf)
+    M.store.bufcount = M.store.bufcount - 1
+  end
 end
 
 ---@param zbuf number #ztab buffer
@@ -39,7 +42,9 @@ end
 ---@param nbuf number
 M.addbuf = function(nbuf)
   local len = M.store.bufcount
-  -- M.store.bufs[len + 1] = nbuf
+  if M.getzbuf(nbuf) then
+    return
+  end
   table.insert(M.store.bufs, len + 1, nbuf)
   M.store.bufcount = M.store.bufcount + 1
 
@@ -73,7 +78,6 @@ M.getnbuf = function(ztabbuf)
       end
     end
   end
-  print("without")
   return nil
 end
 
@@ -95,11 +99,35 @@ local zbufgoto = function(zbuf)
   end
 end
 
+local wasactive = false
+
+---@param b boolean #Are there tabs open?
+M.tabsactive = function(b)
+  if wasactive ~= b then
+    wasactive = b
+    local con = require("ztab").helpers.__config
+    con.bufline.highlight = highlight.default_hl()
+    if b then
+      for i, hlgrp in pairs(con.bufline.wtabhighlight) do
+        if constants.highlight_names[i] then
+          highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, true, false)
+        end
+      end
+    elseif not b then
+      for i, hlgrp in pairs(con.bufline.highlight) do
+        if constants.highlight_names[i] then
+          highlight.update_component_highlight_group(hlgrp, constants.highlight_names[i], true, true, false)
+        end
+      end
+    end
+  end
+end
+
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return spacer with highlights
 local spacer = function(isSelected)
-  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
-  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
+  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, true, true, true, false))
+  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, false, true, true, false))
 
   return (isSelected and selhl or hl) .. " "
 end
@@ -109,7 +137,7 @@ end
 ---@param isSelected boolean #Is the tab selected?
 ---@return string #Return title component with highlights
 local title = function(bufnr, isSelected)
-  local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected)
+  local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected, true, true, false)
   local file = vim.fn.bufname(bufnr)
   local buftype = vim.fn.getbufvar(bufnr, "&buftype")
   local filetype = vim.fn.getbufvar(bufnr, "&filetype")
@@ -144,7 +172,7 @@ end
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return modified component with highlights
 local modified = function(bufnr, isSelected)
-  local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected)
+  local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected, true, true, false)
   local ret = highlight.hl(hl)
   ret = ret .. (vim.fn.getbufvar(bufnr, "&modified") == 1 and ("[+]" .. spacer(isSelected)) or "")
   return ret
@@ -174,7 +202,8 @@ local devicon = function(bufnr, isSelected)
   end
   if icon then
     local h = require("ztab.highlight")
-    local hl_name = h.get_hl_name(constants.highlight_names.icon, isSelected, true)
+    local hl_name = h.get_hl_name(constants.highlight_names.icon, isSelected)
+    local hl_name_full = h.get_hl_name(constants.highlight_names.icon, isSelected, true, true, false)
     local defaultcol = { fg = "fg", bg = "bg" }
     local colors = defaultcol
     colors = h.extract_highlight_colors((isSelected and devhl or hl_name)) or defaultcol
@@ -186,7 +215,7 @@ local devicon = function(bufnr, isSelected)
 
     -- P(M.__config.highlight[constants.highlight_vars[hl_name]].sp)
 
-    local bghl = h.extract_highlight_colors(hl_name)
+    local bghl = h.extract_highlight_colors(hl_name_full)
     if bghl ~= nil then
       colors.bg = bghl.bg or defaultcol.bg
     end
@@ -195,10 +224,10 @@ local devicon = function(bufnr, isSelected)
       fg = colors.fg,
       sp = con.bufline.highlight[constants.highlight_vars[hl_name]].sp,
       underline = con.bufline.highlight[constants.highlight_vars[hl_name]].underline,
-    }, h.get_hl_name(devhl, isSelected, false))
+    }, h.get_hl_name(devhl, isSelected, false), false, true, false)
     -- P("hl: " .. (hl or '') .. ' and ' .. h.get_hl_name(devhl, isSelected, false))
     local selectedHlStart = h.hl(hl)
-    local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected))
+    local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, true, false))
     return selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
   end
   return ""
@@ -214,22 +243,22 @@ local separator = function(index, sel, side)
   if side ~= "left" and side ~= "right" then
     return ""
   end
-  local hl = highlight.get_hl_name(constants.highlight_names.separator, sel)
+  local hl = highlight.get_hl_name(constants.highlight_names.separator, sel, true, true, false)
   -- local last = index == vim.fn.tabpagenr("$")
   local first = index == 1
   local sep = ""
 
   if side == "left" then
-    sep = constants.sep_chars[con.sep_name][2]
+    sep = constants.sep_chars[con.bufline.sep_name][2]
     if
-        first and con.sep_name == constants.sep_names.slant
-        or first and con.sep_name == constants.sep_names.slope
+        first and con.bufline.sep_name == constants.sep_names.slant
+        or first and con.bufline.sep_name == constants.sep_names.slope
     then
       return highlight.hl(hl) .. ""
     end
     return highlight.hl(hl) .. sep
   elseif side == "right" then
-    sep = constants.sep_chars[con.sep_name][1]
+    sep = constants.sep_chars[con.bufline.sep_name][1]
     return highlight.hl(hl) .. sep
   end
 
@@ -243,13 +272,11 @@ local cell = function(ztab)
   local con = require("ztab").helpers.__config
   local bufnr = M.getnbuf(ztab) and M.getnbuf(ztab) or 0
   local isSelected = vim.api.nvim_get_current_buf() == bufnr
-  local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title_sel))
-  local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title))
 
-  local spacing = (isSelected and selhl or hl) .. spacer(isSelected)
+  local spacing = spacer(isSelected)
 
   local ret = ""
-  if con.left_sep then
+  if con.bufline.right_sep then
     ret = ret .. separator(ztab, isSelected, "left")
   end
   ret = ret
@@ -258,29 +285,41 @@ local cell = function(ztab)
       .. spacing
       .. modified(bufnr, isSelected)
       .. devicon(bufnr, isSelected)
-  if con.right_sep then
+  if con.bufline.left_sep then
     ret = ret .. separator(bufnr, isSelected, "right")
   end
-  ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill))
+  ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, true, true, false))
 
   return ret
 end
 
 ---@param bufnr number #Buffer number to run filter on
 ---@return boolean #true = pass, false = fail
-local buffilter = function(bufnr)
+M.buffilter = function(bufnr)
+  local bufinfo = vim.fn.getbufinfo(bufnr)[1]
+  if bufinfo == nil then
+    print("info=null")
+    return false
+  end
   local ft = vim.fn.getbufvar(bufnr, "&filetype")
-  local hidden = vim.fn.getbufinfo(bufnr)[1].hidden == 1
+  local hidden = bufinfo.hidden == 1
+  if bufinfo.name == "" or nil then
+    print("name=null")
+    return false
+  end
   if ft == "" or nil then
     return false
   end
   if not vim.api.nvim_buf_is_loaded(bufnr) then
+    print("loaded=false")
     return false
   end
   if hidden then
+    print("hidden=true")
     return false
   end
 
+  print("pass")
   return true
 end
 
@@ -294,7 +333,7 @@ local bufline = function()
     line = line .. cell(i)
   end
   -- fill the rest with this hl group
-  line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill)) .. "%="
+  line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, true, true, false)) .. "%="
   return line
 end
 
