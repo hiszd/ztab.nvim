@@ -21,14 +21,14 @@ vim.api.nvim_create_autocmd("BufReadPost,BufEnter", {
 -- Tab events
 vim.api.nvim_create_autocmd("TabNew", {
   callback = function()
-    require("ztab.bufferline")._private.tabsactive(true)
+    require("ztab.bufline")._private.tabsactive(true)
   end,
 })
 
 vim.api.nvim_create_autocmd("TabClosed", {
   callback = function()
     if vim.fn.tabpagenr("$") <= 1 then
-      require("ztab.bufferline")._private.tabsactive(false)
+      require("ztab.bufline")._private.tabsactive(false)
     end
   end,
 })

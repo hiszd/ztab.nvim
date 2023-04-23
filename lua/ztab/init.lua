@@ -97,14 +97,14 @@ local setup = function(opts)
       if opts.bufline.highlight then
         M.__config.opts.bufline.highlight = opts.bufline.highlight
         M.__config.bufline.highlight =
-            vim.tbl_deep_extend("keep", M.__config.opts.bufline.highlight, M.__config.bufline.highlight)
+        vim.tbl_deep_extend("keep", M.__config.opts.bufline.highlight, M.__config.bufline.highlight)
         M.__config.bufline.highlight = M.typed_highlights(M.__config.bufline.highlight)
       end
       -- Merge the default configuration and the one provided by the user
       if opts.bufline.wtabhighlight then
         M.__config.opts.bufline.wtabhighlight = opts.bufline.wtabhighlight
         M.__config.bufline.wtabhighlight =
-            vim.tbl_deep_extend("keep", M.__config.opts.bufline.wtabhighlight, M.__config.bufline.wtabhighlight)
+        vim.tbl_deep_extend("keep", M.__config.opts.bufline.wtabhighlight, M.__config.bufline.wtabhighlight)
         M.__config.bufline.wtabhighlight = M.typed_highlights(M.__config.bufline.wtabhighlight)
       end
       if opts.bufline.enabled then
@@ -133,7 +133,7 @@ local setup = function(opts)
       if opts.tabline.highlight then
         M.__config.opts.tabline.highlight = opts.tabline.highlight
         M.__config.tabline.highlight =
-            vim.tbl_deep_extend("keep", M.__config.opts.tabline.highlight, M.__config.tabline.highlight)
+        vim.tbl_deep_extend("keep", M.__config.opts.tabline.highlight, M.__config.tabline.highlight)
         M.__config.tabline.highlight = M.typed_highlights(M.__config.tabline.highlight)
       end
       if opts.tabline.enabled then
@@ -188,12 +188,12 @@ end
 M.typed_highlights = function(h)
   local defcol = highlight.defaulthlcols()
   local reptab = {
-        ["activecol.fg"] = defcol.activecol.fg,
-        ["activecol.bg"] = defcol.activecol.bg,
-        ["inactivecol.fg"] = defcol.inactivecol.fg,
-        ["inactivecol.bg"] = defcol.inactivecol.bg,
-        ["fillcol.fg"] = defcol.fillcol.fg,
-        ["fillcol.bg"] = defcol.fillcol.bg,
+    ["activecol.fg"] = defcol.activecol.fg,
+    ["activecol.bg"] = defcol.activecol.bg,
+    ["inactivecol.fg"] = defcol.inactivecol.fg,
+    ["inactivecol.bg"] = defcol.inactivecol.bg,
+    ["fillcol.fg"] = defcol.fillcol.fg,
+    ["fillcol.bg"] = defcol.fillcol.bg,
   }
   for i, hlgrp in pairs(h) do
     for r, col in pairs(reptab) do
@@ -210,6 +210,8 @@ M.typed_highlights = function(h)
   end
   return h
 end
+
+M.extract_highlight_colors = highlight.extract_highlight_colors
 
 return {
   helpers = M,

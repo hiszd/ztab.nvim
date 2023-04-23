@@ -250,8 +250,7 @@ local separator = function(index, sel, side)
 
   if side == "left" then
     sep = constants.sep_chars[con.bufline.sep_name][2]
-    if
-        first and con.bufline.sep_name == constants.sep_names.slant
+    if first and con.bufline.sep_name == constants.sep_names.slant
         or first and con.bufline.sep_name == constants.sep_names.slope
     then
       return highlight.hl(hl) .. ""
