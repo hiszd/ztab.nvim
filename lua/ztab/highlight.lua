@@ -95,16 +95,16 @@ M.update_component_highlight_group = function(color, highlight_tag, pfix, buf, t
     local addprefix = addpfix(buf and true or false, tab and true or false)
     local highlight_group_name
     if pfix then
-      if addprefix then
+      if addprefix ~= "" then
         highlight_group_name = table.concat({ constants.PREFIX, addprefix, highlight_tag }, "_")
       else
         highlight_group_name = table.concat({ constants.PREFIX, highlight_tag }, "_")
       end
     else
-      if addprefix then
-        highlight_group_name = table.concat({ constants.PREFIX, addprefix, highlight_tag }, "_")
+      if addprefix ~= "" then
+        highlight_group_name = table.concat({ addprefix, highlight_tag }, "_")
       else
-        highlight_group_name = table.concat({ constants.PREFIX, highlight_tag }, "_")
+        highlight_group_name = highlight_tag
       end
     end
     pcall(function()
@@ -115,6 +115,7 @@ M.update_component_highlight_group = function(color, highlight_tag, pfix, buf, t
         underline = color.underline or false,
       })
     end)
+    -- Printf("group:%q fg:%q bg:%q", highlight_group_name, color.fg, color.bg)
     return highlight_group_name
   else
     print("need to specify a background and foreground color")
@@ -127,7 +128,7 @@ end
 ---@param color_group string #Highlight group name
 ---@return ZTabHighlightGroup #Returns highlight group color information
 M.extract_highlight_colors = function(color_group)
-  local rtrn = { bg = "", fg = "" }
+  local rtrn = { bg = "", fg = "", found = false }
   if vim.fn.hlexists(color_group) == 0 then
     return rtrn
   end
@@ -141,6 +142,7 @@ M.extract_highlight_colors = function(color_group)
   if color.foreground ~= nil then
     rtrn.fg = string.format("#%06x", color.foreground)
   end
+  rtrn.found = true
   return rtrn
 end
 

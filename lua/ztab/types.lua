@@ -30,6 +30,7 @@
 ---@field bg ZTabColorInput | string
 ---@field sp ZTabColorInput | string?
 ---@field underline boolean?
+---@field found? boolean?
 
 ---@class ZTabSetupOpts
 ---@field enabled boolean?

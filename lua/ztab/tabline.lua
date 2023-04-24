@@ -84,11 +84,12 @@ local devicon = function(bufnr, isSelected)
     local h = require("ztab.highlight")
     local hl_name = h.get_hl_name(constants.highlight_names.icon, isSelected)
     local hl_name_full = h.get_hl_name(constants.highlight_names.icon, isSelected, true, false, true)
+    local devhl_name_full = h.get_hl_name(devhl, false, true, false, true)
     local defaultcol = { fg = "fg", bg = "bg" }
     local colors = defaultcol
-    colors = h.extract_highlight_colors((isSelected and devhl or hl_name)) or defaultcol
+    colors = h.extract_highlight_colors((isSelected and devhl_name_full or hl_name)) or defaultcol
     if con.tabline.devicon_colors == "true" then
-      colors = h.extract_highlight_colors(devhl) or defaultcol
+      colors = h.extract_highlight_colors(devhl_name_full) or defaultcol
     elseif con.tabline.devicon_colors == "false" then
       colors = h.extract_highlight_colors(hl_name) or defaultcol
     end
