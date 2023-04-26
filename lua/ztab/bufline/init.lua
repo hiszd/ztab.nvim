@@ -6,36 +6,13 @@ local highlight = require("ztab.highlight")
 ---@type table
 local M = {}
 
-M.store = {
-  ---@type table<number, number>
-  bufs = {},
-  ---@type number
-  bufcount = 0,
-}
+local store = require("ztab.bufline.store"):new()
 
----@param bufs table
-function M.store:updatebufs(bufs)
-  self.bufs = bufs
-  local count = 0
-  for _ in pairs(bufs) do
-    count = count + 1
-  end
-  self.bufcount = count
-end
+M.store = store
 
 ---@param bufs table
 M.updatebufs = function(bufs)
   return M.store:updatebufs(bufs)
-end
-
----@param nbuf number #ztab buffer
-function M.store:remnbuf(nbuf)
-  local zbuf = self:getzbuf(nbuf)
-  if zbuf ~= nil then
-    print("nbuf: " .. nbuf .. " zbuf: " .. zbuf)
-    table.remove(self.bufs, zbuf)
-    self.bufcount = self.bufcount - 1
-  end
 end
 
 ---@param nbuf number #ztab buffer
@@ -44,27 +21,8 @@ M.remnbuf = function(nbuf)
 end
 
 ---@param zbuf number #ztab buffer
-function M.store:remzbuf(zbuf)
-  table.remove(self.bufs, zbuf)
-  self.bufcount = self.bufcount - 1
-end
-
----@param zbuf number #ztab buffer
 M.remzbuf = function(zbuf)
   return M.store:remzbuf(zbuf)
-end
-
----@param nbuf number
-function M.store:addbuf(nbuf)
-  local len = self.bufcount
-  if M.getzbuf(nbuf) then
-    return
-  end
-  table.insert(self.bufs, len + 1, nbuf)
-  self.bufcount = self.bufcount + 1
-
-  print("zbufs")
-  P(self.bufs)
 end
 
 ---@param nbuf number
@@ -90,22 +48,6 @@ end
 ---@return number | nil #ztab buffer tab number
 M.getzbuf = function(nvimbuf)
   return M.store:getzbuf(nvimbuf)
-end
-
----Return nvim buffer from ztab buffer tab number
----@param ztabbuf number #ztab buffer tab number
----@return number | nil #nvim buffer number
-function M.store:getnbuf(ztabbuf)
-  ---@type number
-  local bufcount = M.store.bufcount
-  if tonumber(bufcount) >= tonumber(ztabbuf) then
-    for zb, nb in ipairs(M.store.bufs) do
-      if tonumber(zb) == tonumber(ztabbuf) then
-        return nb
-      end
-    end
-  end
-  return nil
 end
 
 ---Return nvim buffer from ztab buffer tab number
