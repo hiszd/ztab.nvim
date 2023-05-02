@@ -17,7 +17,7 @@ M.__config = {
     left_sep = true,
     right_sep = false,
     devicon_colors = "selected",
-    highlight = highlight.default_hl(),
+    highlight = highlight.default_hl(false, constants.sep_names.thick),
   },
   bufline = {
     enabled = false,
@@ -25,8 +25,8 @@ M.__config = {
     left_sep = true,
     right_sep = false,
     devicon_colors = "selected",
-    highlight = highlight.default_hl(),
-    wtabhighlight = highlight.default_hl(),
+    highlight = highlight.default_hl(false, constants.sep_names.thick),
+    wtabhighlight = highlight.default_hl(true, constants.sep_names.thick),
   },
   opts = {
     tabline = {
@@ -74,9 +74,9 @@ end
 ---@return table #Return entire module
 local setup = function(opts)
   if opts then
-    local b = opts.bufline and true or false
-    local t = opts.tabline and true or false
-    if b then
+    -- local b = opts.bufline and true or false
+    -- local t = opts.tabline and true or false
+    if opts.bufline.enabled then
       if opts.bufline.sep_name then
         M.__config.opts.bufline.sep_name = opts.bufline.sep_name
         M.__config.bufline.sep_name = opts.bufline.sep_name
@@ -96,15 +96,27 @@ local setup = function(opts)
       -- Merge the default configuration and the one provided by the user
       if opts.bufline.highlight then
         M.__config.opts.bufline.highlight = opts.bufline.highlight
-        M.__config.bufline.highlight =
-        vim.tbl_deep_extend("keep", M.__config.opts.bufline.highlight, M.__config.bufline.highlight)
+        M.__config.bufline.highlight = vim.tbl_deep_extend(
+          "keep",
+          M.__config.opts.bufline.highlight,
+          highlight.default_hl(false, M.__config.bufline.sep_name)
+        )
+        M.__config.bufline.highlight = M.typed_highlights(M.__config.bufline.highlight)
+      else
         M.__config.bufline.highlight = M.typed_highlights(M.__config.bufline.highlight)
       end
       -- Merge the default configuration and the one provided by the user
       if opts.bufline.wtabhighlight then
+        print("testing")
         M.__config.opts.bufline.wtabhighlight = opts.bufline.wtabhighlight
-        M.__config.bufline.wtabhighlight =
-        vim.tbl_deep_extend("keep", M.__config.opts.bufline.wtabhighlight, M.__config.bufline.wtabhighlight)
+        M.__config.bufline.wtabhighlight = vim.tbl_deep_extend(
+          "keep",
+          M.__config.opts.bufline.wtabhighlight,
+          highlight.default_hl(true, M.__config.bufline.sep_name)
+        )
+        M.__config.bufline.wtabhighlight = M.typed_highlights(M.__config.bufline.wtabhighlight)
+        P(M.__config.bufline.wtabhighlight)
+      else
         M.__config.bufline.wtabhighlight = M.typed_highlights(M.__config.bufline.wtabhighlight)
       end
       if opts.bufline.enabled then
@@ -112,7 +124,7 @@ local setup = function(opts)
         M.__config.bufline.enabled = opts.bufline.enabled
       end
     end
-    if t then
+    if opts.tabline.enabled then
       if opts.tabline.sep_name then
         M.__config.opts.tabline.sep_name = opts.tabline.sep_name
         M.__config.tabline.sep_name = opts.tabline.sep_name
@@ -132,8 +144,11 @@ local setup = function(opts)
       -- Merge the default configuration and the one provided by the user
       if opts.tabline.highlight then
         M.__config.opts.tabline.highlight = opts.tabline.highlight
-        M.__config.tabline.highlight =
-        vim.tbl_deep_extend("keep", M.__config.opts.tabline.highlight, M.__config.tabline.highlight)
+        M.__config.tabline.highlight = vim.tbl_deep_extend(
+          "keep",
+          M.__config.opts.tabline.highlight,
+          highlight.default_hl(false, M.__config.tabline.sep_name)
+        )
         M.__config.tabline.highlight = M.typed_highlights(M.__config.tabline.highlight)
       end
       if opts.tabline.enabled then
@@ -188,12 +203,12 @@ end
 M.typed_highlights = function(h)
   local defcol = highlight.defaulthlcols()
   local reptab = {
-    ["activecol.fg"] = defcol.activecol.fg,
-    ["activecol.bg"] = defcol.activecol.bg,
-    ["inactivecol.fg"] = defcol.inactivecol.fg,
-    ["inactivecol.bg"] = defcol.inactivecol.bg,
-    ["fillcol.fg"] = defcol.fillcol.fg,
-    ["fillcol.bg"] = defcol.fillcol.bg,
+        ["activecol.fg"] = defcol.activecol.fg,
+        ["activecol.bg"] = defcol.activecol.bg,
+        ["inactivecol.fg"] = defcol.inactivecol.fg,
+        ["inactivecol.bg"] = defcol.inactivecol.bg,
+        ["fillcol.fg"] = defcol.fillcol.fg,
+        ["fillcol.bg"] = defcol.fillcol.bg,
   }
   for i, hlgrp in pairs(h) do
     for r, col in pairs(reptab) do

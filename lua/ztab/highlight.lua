@@ -138,11 +138,12 @@ M.extract_highlight_colors = function(color_group)
   end
   if color.background ~= nil then
     rtrn.bg = string.format("#%06x", color.background)
+    rtrn.found = true
   end
   if color.foreground ~= nil then
     rtrn.fg = string.format("#%06x", color.foreground)
+    rtrn.found = true
   end
-  rtrn.found = true
   return rtrn
 end
 
@@ -168,30 +169,19 @@ M.defaulthlcols = function()
   return { fillcol = fillcol, inactivecol = inactivecol, activecol = activecol }
 end
 
-M.default_hl = function()
+---@param w boolean? #Is this with or without tabline
+---@param type string? #Is this with or without tabline
+M.default_hl = function(w, type)
   local defhl = M.defaulthlcols()
   local fillcol = defhl.fillcol
   local inactivecol = defhl.inactivecol
   local activecol = defhl.activecol
-
   ---@type ZTabHighlightOpts
   local rtrn = {
-        ["separator"] = {
-      fg = fillcol.bg,
-      bg = inactivecol.bg,
-      sp = inactivecol.fg,
-      underline = false,
-    },
         ["separator_sel"] = {
-      fg = fillcol.bg,
+      fg = fillcol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
-      underline = false,
-    },
-        ["title"] = {
-      fg = inactivecol.fg,
-      bg = inactivecol.bg,
-      sp = inactivecol.fg,
       underline = false,
     },
         ["title_sel"] = {
@@ -212,25 +202,89 @@ M.default_hl = function()
       sp = activecol.fg,
       underline = false,
     },
-        ["icon"] = {
-      fg = inactivecol.fg,
-      bg = inactivecol.bg,
-      sp = inactivecol.fg,
-      underline = false,
-    },
         ["icon_sel"] = {
       fg = activecol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
       underline = false,
     },
-        ["fill"] = {
-      fg = fillcol.fg,
-      bg = fillcol.bg,
-      sp = fillcol.fg,
-      underline = false,
-    },
   }
+
+  --If this is with tabs
+  if w then
+    rtrn = vim.tbl_deep_extend("keep", {
+          ["fill"] = {
+        fg = fillcol.fg,
+        bg = activecol.bg,
+        sp = fillcol.fg,
+        underline = false,
+      },
+          ["title"] = {
+        fg = inactivecol.fg,
+        bg = activecol.bg,
+        sp = inactivecol.fg,
+        underline = false,
+      },
+          ["icon"] = {
+        fg = activecol.fg,
+        bg = activecol.bg,
+        sp = activecol.fg,
+        underline = false,
+      },
+          ["separator"] = {
+        fg = fillcol.bg,
+        bg = activecol.bg,
+        sp = inactivecol.fg,
+        underline = false,
+      },
+    }, rtrn)
+    --If this is without tabs
+  else
+    rtrn = vim.tbl_deep_extend("keep", {
+          ["fill"] = {
+        fg = fillcol.fg,
+        bg = fillcol.bg,
+        sp = fillcol.fg,
+        underline = false,
+      },
+          ["title"] = {
+        fg = inactivecol.fg,
+        bg = inactivecol.bg,
+        sp = inactivecol.fg,
+        underline = false,
+      },
+          ["icon"] = {
+        fg = inactivecol.fg,
+        bg = inactivecol.bg,
+        sp = inactivecol.fg,
+        underline = false,
+      },
+          ["separator"] = {
+        fg = fillcol.bg,
+        bg = inactivecol.bg,
+        sp = inactivecol.fg,
+        underline = false,
+      },
+    }, rtrn)
+  end
+
+  -- If the type of tab is any slant the default behavior is to look like a tab
+  if type ~= constants.sep_names.thin and type ~= constants.sep_names.thick then
+    rtrn = vim.tbl_deep_extend("keep", {
+          ["separator"] = {
+        fg = inactivecol.bg,
+        bg = inactivecol.bg,
+        sp = inactivecol.fg,
+        underline = false,
+      },
+          ["separator_sel"] = {
+        fg = fillcol.bg,
+        bg = activecol.bg,
+        sp = activecol.fg,
+        underline = false,
+      },
+    }, rtrn)
+  end
 
   return rtrn
 end
