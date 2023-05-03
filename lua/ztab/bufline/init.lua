@@ -384,11 +384,17 @@ M.buffilter = function(bufnr)
     print("loaded=false")
     return false
   end
+  if not (tonumber(vim.api.nvim_buf_line_count(bufnr)) > 0) then
+    print("lines<=0 " .. bufnr)
+    print(vim.api.nvim_buf_line_count(bufnr) .. " buf:" .. bufnr)
+    return false
+  end
   if hidden then
     print("hidden=true")
     return false
   end
 
+  print(vim.api.nvim_buf_line_count(bufnr) .. " buf:" .. bufnr)
   print("pass")
   return true
 end

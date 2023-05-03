@@ -1,6 +1,7 @@
 -- Buffer events
-vim.api.nvim_create_autocmd("BufDelete", {
+vim.api.nvim_create_autocmd("BufDelete,BufUnload,BufWipeout", {
   callback = function(info)
+    P({ info, require("ztab.bufline")._private.store.bufs })
     local zbuf = require("ztab.bufline")._private.store:getzbuf(info.buf)
     if zbuf ~= nil then
       require("ztab.bufline")._private.store:remnbuf(info.buf)
@@ -9,7 +10,7 @@ vim.api.nvim_create_autocmd("BufDelete", {
   end,
 })
 
-vim.api.nvim_create_autocmd("BufReadPost,BufEnter", {
+vim.api.nvim_create_autocmd("BufRead", {
   callback = function(info)
     if require("ztab.bufline")._private.buffilter(info.buf) then
       require("ztab.bufline")._private.store:addbuf(info.buf)
