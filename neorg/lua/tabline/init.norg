@@ -1,3 +1,12 @@
+@document.meta
+tangle: {
+    languages: {
+        lua: ./lua/ztab/tabline/init.lua
+    }
+}
+@end
+
+@code lua
 require("ztab.types")
 
 local constants = require("ztab.constants")
@@ -203,3 +212,4 @@ end
 return {
   draw = tabline,
 }
+@end

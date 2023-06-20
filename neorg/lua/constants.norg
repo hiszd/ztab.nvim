@@ -1,3 +1,12 @@
+@document.meta
+tangle: {
+    languages: {
+        lua: ./lua/ztab/constants.lua
+    }
+}
+@end
+
+@code lua
 local M = {}
 ---------------------------------------------------------------------------//
 -- Constants
@@ -95,3 +104,4 @@ M.FOLDER_ICON = ""
 M.ELLIPSIS = "…"
 
 return M
+@end

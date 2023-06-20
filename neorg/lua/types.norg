@@ -1,3 +1,12 @@
+@document.meta
+tangle: {
+    languages: {
+        lua: ./lua/ztab/types.lua
+    }
+}
+@end
+
+@code lua
 ---@alias ZTabSeparatorNames
 ---| `constants.sep_names.thin`
 ---| `constants.sep_names.thick`
@@ -75,3 +84,4 @@
 ---@field tabline ZElConfig
 ---@field bufline ZElConfig
 ---@field opts ZSetupOpts
+@end

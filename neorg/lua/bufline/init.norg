@@ -1,3 +1,12 @@
+@document.meta
+tangle: {
+    languages: {
+        lua: ./lua/ztab/bufline/init.lua
+    }
+}
+@end
+
+@code lua
 require("ztab.types")
 
 local constants = require("ztab.constants")
@@ -403,3 +412,4 @@ return {
   zbufgoto = zbufgoto,
   nbufgoto = nbufgoto,
 }
+@end
