@@ -1,7 +1,7 @@
 @document.meta
 tangle: {
     languages: {
-        lua: ./lua/ztab/bufline/store.lua
+        lua: ./after/plugin/ztab.lua
     }
 }
 @end
