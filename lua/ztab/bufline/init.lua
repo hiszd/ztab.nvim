@@ -10,7 +10,8 @@ local store = require("ztab.bufline.store"):new()
 
 M.store = store
 
----@param nbuf number #The nvim buffer you want to navigate to
+---Navigate to a buftab by nvim buffer id
+---@param nbuf number #neovim buffer id
 local nbufgoto = function(nbuf)
   local zbuf = M.store:getzbuf(nbuf)
   if zbuf then
@@ -18,11 +19,12 @@ local nbufgoto = function(nbuf)
   end
 end
 
----@param zbuf number #The ztab buffer tab you want to navigate to
+---Navigate to a buftab by ztab buffer index
+---@param zbuf number #ztab buffer index
 local zbufgoto = function(zbuf)
   local nbuf = M.store:getnbuf(zbuf)
-  print("berts")
-  print(nbuf)
+  -- print("berts")
+  -- print(nbuf)
   if nbuf then
     vim.api.nvim_set_current_buf(nbuf)
   end
@@ -30,6 +32,7 @@ end
 
 local wasactive = false
 
+---Update function for ui changes to bufline when tabline is also open
 ---@param b boolean #Are there tabs open?
 M.tabsactive = function(b)
   if wasactive ~= b then
@@ -241,14 +244,7 @@ local devicon = function(bufnr, isSelected, ntab)
     local hl_name_sel = h.get_hl_name(devhl, true, true, true, false)
     local selcolcmp = h.extract_highlight_colors(hl_name_sel)
     local ifpt11 = (selcolcmp.found == false)
-    -- print((ifpt11 and "color found " or "color not found ") .. hl_name_sel)
     local ifpt22 = (selcolcmp.fg ~= color)
-    -- print(
-    --   (ifpt22 and "color is not same " or "color is same ")
-    --   .. string.format("%q", color)
-    --   .. ", "
-    --   .. string.format("%q", selcolcmp.fg)
-    -- )
     if ifpt11 or ifpt22 then
       hlsel = h.update_component_highlight_group({
         bg = colors[opt]["true"][tab].bg,
@@ -259,22 +255,13 @@ local devicon = function(bufnr, isSelected, ntab)
               true
             )]].underline,
       }, hl_name_sel, false, false, false)
-      -- print("hlsel: " .. hlsel .. "\n\n")
     else
       hlsel = hl_name_sel
-      -- print("hlsel: " .. hlsel .. "\n\n")
     end
     local hl_name_dsel = h.get_hl_name(devhl, false, true, true, false)
     local dselcolcmp = h.extract_highlight_colors(hl_name_dsel)
     local ifpt1 = (dselcolcmp.found == false)
-    -- print((ifpt1 and "color found " or "color not found ") .. hl_name_dsel)
     local ifpt2 = (dselcolcmp.fg ~= color)
-    -- print(
-    --   (ifpt2 and "color is not same " or "color is same ")
-    --   .. string.format("%q", color)
-    --   .. ", "
-    --   .. string.format("%q", dselcolcmp.fg)
-    -- )
     if ifpt1 or ifpt2 then
       hldsel = h.update_component_highlight_group({
         bg = colors[con.bufline.devicon_colors]["false"][tab].bg,
@@ -288,14 +275,11 @@ local devicon = function(bufnr, isSelected, ntab)
               false
             )]].underline,
       }, hl_name_dsel, false, false, false)
-      -- print("hldsel: " .. hldsel .. "\n\n")
     else
       hldsel = hl_name_dsel
-      -- print("hldsel: " .. hldsel .. "\n\n")
     end
 
     local selectedHlStart = h.hl(isSelected and hlsel or hldsel)
-    -- print("hlfinal: " .. selectedHlStart .. "\n\n")
     local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, true, false))
     local rtrn = selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
     return rtrn

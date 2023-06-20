@@ -5,6 +5,9 @@ Store = {
   bufcount = 0,
 }
 
+---Create new store item
+---@param o table? #table that would be made into a store
+---@return any
 function Store:new(o)
   o = o or {} -- create object if user does not provide one
   setmetatable(o, self)
@@ -12,7 +15,8 @@ function Store:new(o)
   return o
 end
 
----@param bufs table
+---Replace the buffers int the Store with bufs
+---@param bufs table #list of buffers
 function Store:updatebufs(bufs)
   self.bufs = bufs
   local count = 0
@@ -22,23 +26,25 @@ function Store:updatebufs(bufs)
   self.bufcount = count
 end
 
----@param nbuf number #ztab buffer
+---Remove buffer by Neovim buffer id
+---@param nbuf number #neovim buffer id
 function Store:remnbuf(nbuf)
   local zbuf = self:getzbuf(nbuf)
   if zbuf ~= nil then
-    print("nbuf: " .. nbuf .. " zbuf: " .. zbuf)
     table.remove(self.bufs, zbuf)
     self.bufcount = self.bufcount - 1
   end
 end
 
+---Remove buffer by ztab buffer index
 ---@param zbuf number #ztab buffer
 function Store:remzbuf(zbuf)
   table.remove(self.bufs, zbuf)
   self.bufcount = self.bufcount - 1
 end
 
----@param nbuf number
+---Add buffer to ztab list by neovim buffer id
+---@param nbuf number #neovim buffer id
 function Store:addbuf(nbuf)
   local len = self.bufcount
   if self:getzbuf(nbuf) then
@@ -46,9 +52,6 @@ function Store:addbuf(nbuf)
   end
   table.insert(self.bufs, len + 1, nbuf)
   self.bufcount = len + 1
-
-  print("zbufs")
-  P(self.bufs)
 end
 
 ---Return ztab buffer tab number from nvim buffer number
@@ -57,8 +60,6 @@ end
 function Store:getzbuf(nvimbuf)
   for zbuf, buf in pairs(self.bufs) do
     if buf == nvimbuf then
-      -- print("zbuffer:" .. zbuf)
-      -- print("nbuffer:" .. nvimbuf)
       return zbuf
     end
   end
