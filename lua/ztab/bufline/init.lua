@@ -110,7 +110,7 @@ end
 --- Get tab devicon content
 ---@param bufnr number #Buffer number
 ---@param isSelected boolean #Is the buffer selected?
----@param tab boolean #Are tabs active?
+---@param ntab boolean #Are tabs active?
 ---@return string #Return devicon with highlights
 local devicon = function(bufnr, isSelected, ntab)
   local tab = ntab and "true" or "false"

@@ -1,8 +1,0 @@
-* Future Functionality
-
-** TODO git highlighting
-
-** TODO lsp highlighting
-
-** TODO tab picker
-* Ease of Use Things
