@@ -12,10 +12,8 @@ vim.api.nvim_create_autocmd("BufDelete,BufUnload,BufWipeout", {
 
 vim.api.nvim_create_autocmd("BufRead", {
   callback = function(info)
-    if require("ztab.bufline")._private.buffilter(info.buf) then
-      require("ztab.bufline")._private.store:addbuf(info.buf)
-      vim.cmd("redrawstatus")
-    end
+    require("ztab.bufline")._private.store:addbuf(info.buf)
+    vim.cmd("redrawstatus")
   end,
 })
 
