@@ -2,6 +2,7 @@ require("ztab.types")
 
 local constants = require("ztab.constants")
 local highlight = require("ztab.highlight")
+-- local dP = require("ztab.utils").dP
 
 ---@type table
 local M = {}
@@ -9,6 +10,33 @@ local M = {}
 local store = require("ztab.bufline.store"):new()
 
 M.store = store
+
+M.get_listed_buffers = function()
+  local bufs_loaded = {}
+
+  local getnm = vim.api.nvim_buf_get_name
+  local is_loaded = vim.api.nvim_buf_is_loaded
+  for i, buf_hndl in ipairs(vim.api.nvim_list_bufs()) do
+    if is_loaded(buf_hndl) then
+      bufs_loaded[i] = { buf_hndl, getnm(buf_hndl) }
+    end
+  end
+
+  return bufs_loaded
+end
+
+M.get_all_buffers = function()
+  local buffers = {}
+  local len = 0
+  local vim_fn = vim.fn
+
+  for buffer = 1, vim_fn.bufnr('$') do
+    len = len + 1
+    buffers[len] = buffer
+  end
+
+  return buffers
+end
 
 ---Navigate to a buftab by nvim buffer id
 ---@param nbuf number #neovim buffer id

@@ -1,11 +1,4 @@
----@type boolean
-local debug = true
-
-local function dP(...)
-  if debug then
-    print(vim.inspect(...))
-  end
-end
+local dP = require('ztab.utils').dP
 
 Store = {
   ---@type table<number, number>
@@ -15,19 +8,18 @@ Store = {
 }
 
 function Store:changed()
-  ---@type table<number, number>
-  local bufs = {}
-  for index, value in pairs(self.bufs) do
-    -- dP({"raw buf", index, value})
+  for _, value in pairs(self.bufs) do
     if self:buffilter(value) then
-      bufs[index] = value
-      P({"nnn", bufs})
-      -- dP({ "correct buf", index, value })
+      dP({ "nnn", vim.api.nvim_buf_get_name(value), value })
     else
-      dP({ "buf removed", index, value })
+      dP({ "bufrm", value })
+      local zbuf = self:getzbuf(value)
+      if zbuf ~= nil then
+        table.remove(self.bufs, zbuf)
+        self.bufcount = self.bufcount - 1
+      end
     end
   end
-  self.bufs = bufs
 end
 
 ---Create new store item
@@ -49,7 +41,7 @@ function Store:updatebufs(bufs)
     count = count + 1
   end
   self.bufcount = count
-  self:changed()
+  -- self:changed()
 end
 
 ---Remove buffer by Neovim buffer id
@@ -60,7 +52,7 @@ function Store:remnbuf(nbuf)
     table.remove(self.bufs, zbuf)
     self.bufcount = self.bufcount - 1
   end
-  self:changed()
+  -- self:changed()
 end
 
 ---Remove buffer by ztab buffer index
@@ -68,7 +60,7 @@ end
 function Store:remzbuf(zbuf)
   table.remove(self.bufs, zbuf)
   self.bufcount = self.bufcount - 1
-  self:changed()
+  -- self:changed()
 end
 
 ---Add buffer to ztab list by neovim buffer id
@@ -81,7 +73,7 @@ function Store:addbuf(nbuf)
       self.bufcount = len + 1
     end
   end
-  self:changed()
+  -- self:changed()
 end
 
 ---Return ztab buffer tab number from nvim buffer number
@@ -139,7 +131,7 @@ function Store:buffilter(bufnr)
   end
   if hidden then
     dP({ bufnr, "hidden=true" })
-    return false
+    -- return false
   end
 
   -- print(vim.api.nvim_buf_line_count(bufnr) .. " buf:" .. bufnr)
