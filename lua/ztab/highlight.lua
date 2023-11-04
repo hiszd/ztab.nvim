@@ -1,5 +1,6 @@
 require("ztab.types")
 local constants = require("ztab.constants")
+local dP = require("ztab.utils").dP
 
 local fmt = string.format
 
@@ -50,6 +51,35 @@ M.get_hl_name = function(hl_name, sel, pfix, buf, tab)
   end
 end
 
+---@param h ZTabHighlightOpts
+---@return ZTabHighlightOpts
+M.typed_highlights = function(h)
+  local defcol = M.defaulthlcols()
+  local reptab = {
+    ["activecol.fg"] = defcol.activecol.fg,
+    ["activecol.bg"] = defcol.activecol.bg,
+    ["inactivecol.fg"] = defcol.inactivecol.fg,
+    ["inactivecol.bg"] = defcol.inactivecol.bg,
+    ["fillcol.fg"] = defcol.fillcol.fg,
+    ["fillcol.bg"] = defcol.fillcol.bg,
+  }
+  for i, hlgrp in pairs(h) do
+    for r, col in pairs(reptab) do
+      if hlgrp.fg == r then
+        h[i].fg = col
+      end
+      if hlgrp.bg == r then
+        h[i].bg = col
+      end
+      if hlgrp.sp == r then
+        h[i].sp = col
+      end
+    end
+  end
+  return h
+end
+
+
 --- Wrap a string in vim's tabline highlight syntax
 ---@param item string #Highlight group
 ---@return string #Returns formatted string matching tabline highlight syntax
@@ -78,7 +108,7 @@ M.create_component_highlight_group = function(color, highlight_tag)
     end
   else
     print("need to specify a background and foreground color")
-    P(color)
+    dP(color)
   end
   return ""
 end
@@ -119,7 +149,7 @@ M.update_component_highlight_group = function(color, highlight_tag, pfix, buf, t
     return highlight_group_name
   else
     print("need to specify a background and foreground color")
-    P(color)
+    dP(color)
   end
   return ""
 end
@@ -178,31 +208,31 @@ M.default_hl = function(w, type)
   local activecol = defhl.activecol
   ---@type ZTabHighlightOpts
   local rtrn = {
-        ["separator_sel"] = {
+    ["separator_sel"] = {
       fg = fillcol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
       underline = false,
     },
-        ["title_sel"] = {
+    ["title_sel"] = {
       fg = activecol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
       underline = false,
     },
-        ["modified"] = {
+    ["modified"] = {
       fg = inactivecol.fg,
       bg = inactivecol.bg,
       sp = inactivecol.fg,
       underline = false,
     },
-        ["modified_sel"] = {
+    ["modified_sel"] = {
       fg = activecol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
       underline = false,
     },
-        ["icon_sel"] = {
+    ["icon_sel"] = {
       fg = activecol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
@@ -213,25 +243,25 @@ M.default_hl = function(w, type)
   --If this is with tabs
   if w then
     rtrn = vim.tbl_deep_extend("keep", {
-          ["fill"] = {
+      ["fill"] = {
         fg = fillcol.fg,
         bg = activecol.bg,
         sp = fillcol.fg,
         underline = false,
       },
-          ["title"] = {
+      ["title"] = {
         fg = inactivecol.fg,
         bg = activecol.bg,
         sp = inactivecol.fg,
         underline = false,
       },
-          ["icon"] = {
+      ["icon"] = {
         fg = activecol.fg,
         bg = activecol.bg,
         sp = activecol.fg,
         underline = false,
       },
-          ["separator"] = {
+      ["separator"] = {
         fg = fillcol.bg,
         bg = activecol.bg,
         sp = inactivecol.fg,
@@ -241,25 +271,25 @@ M.default_hl = function(w, type)
     --If this is without tabs
   else
     rtrn = vim.tbl_deep_extend("keep", {
-          ["fill"] = {
+      ["fill"] = {
         fg = fillcol.fg,
         bg = fillcol.bg,
         sp = fillcol.fg,
         underline = false,
       },
-          ["title"] = {
+      ["title"] = {
         fg = inactivecol.fg,
         bg = inactivecol.bg,
         sp = inactivecol.fg,
         underline = false,
       },
-          ["icon"] = {
+      ["icon"] = {
         fg = inactivecol.fg,
         bg = inactivecol.bg,
         sp = inactivecol.fg,
         underline = false,
       },
-          ["separator"] = {
+      ["separator"] = {
         fg = fillcol.bg,
         bg = inactivecol.bg,
         sp = inactivecol.fg,
@@ -271,13 +301,13 @@ M.default_hl = function(w, type)
   -- If the type of tab is any slant the default behavior is to look like a tab
   if type ~= constants.sep_names.thin and type ~= constants.sep_names.thick then
     rtrn = vim.tbl_deep_extend("keep", {
-          ["separator"] = {
+      ["separator"] = {
         fg = inactivecol.bg,
         bg = inactivecol.bg,
         sp = inactivecol.fg,
         underline = false,
       },
-          ["separator_sel"] = {
+      ["separator_sel"] = {
         fg = fillcol.bg,
         bg = activecol.bg,
         sp = activecol.fg,

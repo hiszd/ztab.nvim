@@ -26,8 +26,8 @@
 ---| "fillcol.bg"
 
 ---@class ZTabHighlightGroup
----@field fg ZTabColorInput | string
----@field bg ZTabColorInput | string
+---@field fg ZTabColorInput | string?
+---@field bg ZTabColorInput | string?
 ---@field sp ZTabColorInput | string?
 ---@field underline boolean?
 ---@field found? boolean?
@@ -35,21 +35,22 @@
 ---@class ZTabSetupOpts
 ---@field enabled boolean?
 ---@field sep_name ZTabSeparatorNames?
----@field left_sep boolean
----@field right_sep boolean
----@field devicon_colors ZTabDeviconColors
+---@field left_sep boolean?
+---@field right_sep boolean?
+---@field devicon_colors ZTabDeviconColors?
 ---@field highlight ZTabHighlightOpts?
 
 ---@class ZBufSetupOpts
 ---@field enabled boolean?
 ---@field sep_name ZTabSeparatorNames?
----@field left_sep boolean
----@field right_sep boolean
----@field devicon_colors ZTabDeviconColors
+---@field left_sep boolean?
+---@field right_sep boolean?
+---@field devicon_colors ZTabDeviconColors?
 ---@field highlight ZTabHighlightOpts?
 ---@field wtabhighlight ZTabHighlightOpts?
 
 ---@class ZSetupOpts
+---@field debug boolean
 ---@field bufline ZBufSetupOpts
 ---@field tabline ZTabSetupOpts
 
@@ -65,11 +66,13 @@
 ---@field ["fill"] ZTabHighlightGroup?
 
 ---@class ZElConfig
+---@field enabled boolean
 ---@field sep_name ZTabSeparatorNames
 ---@field left_sep boolean
 ---@field right_sep boolean
 ---@field devicon_colors ZTabDeviconColors
 ---@field highlight ZTabHighlightOpts
+---@field wtabhighlight ZTabHighlightOpts
 
 ---@class ZConfig
 ---@field tabline ZElConfig

@@ -1,5 +1,5 @@
 ---@type boolean
-local debug = false
+local debug = require('ztab').helpers.__config.debug
 
 local M = {}
 

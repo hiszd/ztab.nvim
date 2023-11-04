@@ -94,7 +94,7 @@ local devicon = function(bufnr, isSelected)
       colors = h.extract_highlight_colors(hl_name) or defaultcol
     end
 
-    -- P(M.__config.highlight[constants.highlight_vars[hl_name]].sp)
+    -- dP(M.__config.highlight[constants.highlight_vars[hl_name]].sp)
 
     local bghl = h.extract_highlight_colors(hl_name_full)
     if bghl ~= nil then
@@ -106,7 +106,7 @@ local devicon = function(bufnr, isSelected)
       sp = con.tabline.highlight[constants.highlight_vars[hl_name]].sp,
       underline = con.tabline.highlight[constants.highlight_vars[hl_name]].underline,
     }, h.get_hl_name(devhl, isSelected, false), false, false, true)
-    -- P("hl: " .. (hl or '') .. ' and ' .. h.get_hl_name(devhl, isSelected, false))
+    -- dP("hl: " .. (hl or '') .. ' and ' .. h.get_hl_name(devhl, isSelected, false))
     local selectedHlStart = h.hl(hl)
     local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, false, true))
     return selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
