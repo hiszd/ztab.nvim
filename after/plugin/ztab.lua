@@ -3,7 +3,7 @@ local dP = require('ztab.utils').dP
 -- Buffer events
 vim.api.nvim_create_autocmd({ "BufDelete", "BufUnload" }, {
   callback = function(info)
-    dP({ info, require("ztab.bufline")._private.store.bufs })
+    -- dP({ info, require("ztab.bufline")._private.store.bufs })
     local zbuf = require("ztab.bufline")._private.store:getzbuf(info.buf)
     if zbuf ~= nil then
       require("ztab.bufline")._private.store:remnbuf(info.buf)

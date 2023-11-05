@@ -145,6 +145,7 @@ end
 ---@return string #Return devicon with highlights
 local devicon = function(bufnr, isSelected, ntab)
   local tab = ntab and "true" or "false"
+  ---@type ZConfig
   local con = require("ztab").helpers.__config
   local icon, devhl, color
   local file = vim.fn.bufname(bufnr)
@@ -174,25 +175,25 @@ local devicon = function(bufnr, isSelected, ntab)
 
     -- the color information orgainzed by the option that will need it
     local reqcol = {
-          ["selected"] = {
+      ["selected"] = {
         con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]],
         con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, false)]],
         con.bufline.wtabhighlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]],
         con.bufline.wtabhighlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, false)]],
       },
-          ["true"] = {
+      ["true"] = {
         con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]],
         con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, false)]],
         con.bufline.wtabhighlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]],
         con.bufline.wtabhighlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, false)]],
       },
-          ["false"] = {
+      ["false"] = {
         con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]],
         con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, false)]],
         con.bufline.wtabhighlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]],
         con.bufline.wtabhighlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, false)]],
       },
-          ["fallback"] = {
+      ["fallback"] = {
         h.extract_highlight_colors("TabLine"),
         h.extract_highlight_colors("TabLineSel"),
       },
@@ -200,67 +201,67 @@ local devicon = function(bufnr, isSelected, ntab)
 
     -- the colors for each option
     local colors = {
-          ["selected"] = {
-            ["true"] = {
-              ["false"] = {
-            fg = color,
-            bg = reqcol["selected"][1].bg,
-          },
-              ["true"] = {
-            fg = color,
-            bg = reqcol["selected"][3].bg,
-          },
-        },
-            ["false"] = {
-              ["false"] = {
-            fg = reqcol["selected"][2].fg,
-            bg = reqcol["selected"][2].bg,
-          },
-              ["true"] = {
-            fg = reqcol["selected"][2].fg,
-            bg = reqcol["selected"][4].bg,
-          },
-        },
-      },
-          ["true"] = {
-            ["true"] = {
-              ["false"] = {
-            fg = color,
-            bg = reqcol["selected"][1].bg,
-          },
-              ["true"] = {
-            fg = color,
-            bg = reqcol["selected"][3].bg,
-          },
-        },
-            ["false"] = {
-              ["false"] = {
-            fg = color,
-            bg = reqcol["selected"][2].bg,
-          },
-              ["true"] = {
-            fg = color,
-            bg = reqcol["selected"][4].bg,
-          },
-        },
-      },
+      ["selected"] = {
+        ["true"] = {
           ["false"] = {
-            ["true"] = {
-              ["false"] = {
+            fg = color,
+            bg = reqcol["selected"][1].bg,
+          },
+          ["true"] = {
+            fg = color,
+            bg = reqcol["selected"][3].bg,
+          },
+        },
+        ["false"] = {
+          ["false"] = {
+            fg = reqcol["selected"][2].fg,
+            bg = reqcol["selected"][2].bg,
+          },
+          ["true"] = {
+            fg = reqcol["selected"][2].fg,
+            bg = reqcol["selected"][4].bg,
+          },
+        },
+      },
+      ["true"] = {
+        ["true"] = {
+          ["false"] = {
+            fg = color,
+            bg = reqcol["selected"][1].bg,
+          },
+          ["true"] = {
+            fg = color,
+            bg = reqcol["selected"][3].bg,
+          },
+        },
+        ["false"] = {
+          ["false"] = {
+            fg = color,
+            bg = reqcol["selected"][2].bg,
+          },
+          ["true"] = {
+            fg = color,
+            bg = reqcol["selected"][4].bg,
+          },
+        },
+      },
+      ["false"] = {
+        ["true"] = {
+          ["false"] = {
             fg = reqcol["selected"][1].fg,
             bg = reqcol["selected"][1].bg,
           },
-              ["true"] = {
+          ["true"] = {
             fg = reqcol["selected"][3].fg,
             bg = reqcol["selected"][3].bg,
           },
         },
-            ["false"] = {
-              ["false"] = {
+        ["false"] = {
+          ["false"] = {
             fg = reqcol["selected"][2].fg,
             bg = reqcol["selected"][2].bg,
           },
-              ["true"] = {
+          ["true"] = {
             fg = reqcol["selected"][4].fg,
             bg = reqcol["selected"][4].bg,
           },
@@ -279,9 +280,9 @@ local devicon = function(bufnr, isSelected, ntab)
         fg = colors[opt]["true"][tab].fg,
         sp = con.bufline.highlight[constants.highlight_vars[h.get_hl_name(constants.highlight_names.icon, true)]].sp,
         underline = con.bufline.highlight[constants.highlight_vars[h.get_hl_name(
-              constants.highlight_names.icon,
-              true
-            )]].underline,
+          constants.highlight_names.icon,
+          true
+        )]].underline,
       }, hl_name_sel, false, false, false)
     else
       hlsel = hl_name_sel
@@ -295,13 +296,13 @@ local devicon = function(bufnr, isSelected, ntab)
         bg = colors[con.bufline.devicon_colors]["false"][tab].bg,
         fg = colors[con.bufline.devicon_colors]["false"][tab].fg,
         sp = con.bufline.highlight[constants.highlight_vars[h.get_hl_name(
-              constants.highlight_names.icon,
-              false
-            )]].sp,
+          constants.highlight_names.icon,
+          false
+        )]].sp,
         underline = con.bufline.highlight[constants.highlight_vars[h.get_hl_name(
-              constants.highlight_names.icon,
-              false
-            )]].underline,
+          constants.highlight_names.icon,
+          false
+        )]].underline,
       }, hl_name_dsel, false, false, false)
     else
       hldsel = hl_name_dsel
@@ -358,7 +359,7 @@ local cell = function(ztab)
   local spacing = spacer(isSelected)
 
   local ret = ""
-  if con.bufline.right_sep then
+  if con.bufline.left_sep then
     ret = ret .. separator(ztab, isSelected, "left")
   end
   ret = ret
@@ -367,7 +368,7 @@ local cell = function(ztab)
       .. spacing
       .. modified(bufnr, isSelected)
       .. devicon(bufnr, isSelected, wasactive)
-  if con.bufline.left_sep then
+  if con.bufline.right_sep then
     ret = ret .. separator(bufnr, isSelected, "right")
   end
   ret = ret .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, true, true, false))

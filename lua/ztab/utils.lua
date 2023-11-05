@@ -1,7 +1,9 @@
 ---@type boolean
-local debug = require('ztab').helpers.__config.debug
+local debug = false
 
 local M = {}
+
+M.setDebug = function(d) debug = d end
 
 M.dP = function(...)
   if debug then
