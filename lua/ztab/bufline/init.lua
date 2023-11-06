@@ -131,10 +131,10 @@ end
 ---@param bufnr number #Buffer number
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return modified component with highlights
-local modified = function(bufnr, isSelected)
+local status = function(bufnr, isSelected)
   local hl = highlight.get_hl_name(constants.highlight_names.modified, isSelected, true, true, false)
   local ret = highlight.hl(hl)
-  ret = ret .. (vim.fn.getbufvar(bufnr, "&modified") == 1 and ("[+]" .. spacer(isSelected)) or "")
+  ret = ret .. (vim.fn.getbufvar(bufnr, "&modified") == 1 and ("" .. spacer(isSelected)) or (" " .. spacer(isSelected)))
   return ret
 end
 
@@ -365,8 +365,7 @@ local cell = function(ztab)
   ret = ret
       .. spacing
       .. title(bufnr, isSelected)
-      .. spacing
-      .. modified(bufnr, isSelected)
+      .. status(bufnr, isSelected)
       .. devicon(bufnr, isSelected, wasactive)
   if con.bufline.right_sep then
     ret = ret .. separator(bufnr, isSelected, "right")
