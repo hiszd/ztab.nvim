@@ -1,4 +1,5 @@
 require("ztab.types")
+local test = require('ztab.test')
 
 local constants = require("ztab.constants")
 local highlight = require("ztab.highlight")
@@ -83,26 +84,65 @@ M.tabsactive = function(b)
   end
 end
 
+local t1 = false
+
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return spacer with highlights
 local spacer = function(isSelected)
   local selhl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, true, true, true, false))
   local hl = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, false, true, true, false))
+  ---@type ZTabPart
+  local spcr = test.ZTabPart:new({
+    isSelected,
+    highlight = {
+      ['content'] = {
+        sel = selhl,
+        nosel = hl,
+      }
+    }
+  })
+  spcr:content(" ")
+  if t1 == false then
+    P(spcr)
+    t1 = true
+  end
 
-  return (isSelected and selhl or hl) .. " "
+  return spcr:draw()
 end
+
+local t2 = false
 
 --- Get tab title text
 ---@param bufnr number #Buffer number
 ---@param isSelected boolean #Is the tab selected?
 ---@return string #Return title component with highlights
 local title = function(bufnr, isSelected)
-  local hl = highlight.get_hl_name(constants.highlight_names.title, isSelected, true, true, false)
+  local hl = highlight.get_hl_name(constants.highlight_names.title, false, true, true, false)
+  local selhl = highlight.get_hl_name(constants.highlight_names.title, true, true, true, false)
   local file = vim.fn.bufname(bufnr)
   local buftype = vim.fn.getbufvar(bufnr, "&buftype")
   local filetype = vim.fn.getbufvar(bufnr, "&filetype")
 
-  local rtrn = highlight.hl(hl)
+  local titl = test.ZTabPart:new({
+    isSelected,
+    highlight = {
+      ['content'] = {
+        sel = highlight.hl(selhl),
+        nosel = highlight.hl(hl),
+      }
+    }
+  })
+  titl:setDraw(function(s)
+    if s.isSelected then
+      -- return s:getHighlight('content').sel .. s.text.prefix .. s.text.content .. s.text.postfix
+      return s:getHighlight('content').sel .. s.text.content
+    else
+      -- return s:getHighlight('content').nosel .. s.text.prefix .. s.text.content .. s.text.postfix
+      return s:getHighlight('content').nosel .. s.text.content
+    end
+  end)
+
+  local rtrn = ''
 
   if buftype == "help" then
     rtrn = rtrn .. "help:" .. vim.fn.fnamemodify(file, ":t:r")
@@ -124,7 +164,15 @@ local title = function(bufnr, isSelected)
   else
     rtrn = rtrn .. vim.fn.pathshorten(vim.fn.fnamemodify(file, ":p:~:t"))
   end
-  return rtrn
+
+  titl:content(rtrn)
+
+  if t2 == false then
+    P(titl)
+    t2 = true
+  end
+
+  return titl:draw()
 end
 
 --- Get tab modified content

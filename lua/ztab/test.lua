@@ -1,38 +1,57 @@
+require('ztab.class')
+
 local M = {}
 
+M.id = 0
 ---@alias ZTabPartDrawFunc fun(s: ZTabPart): string
 
 ---@class ZTabPart
----@field highlight {content: string, prefix?: string, postfix?: string}
----@field text {content: string, prefix?: string, postfix?: string}
----@field __drawfunc ZTabPartDrawFunc
-
-
----@type ZTabPart
 M.ZTabPart = {
+  ---@type {[string]: {sel: string, nosel: string}}
   highlight = {
-    ["content"] = '',
-    ["prefix"] = '',
-    ["postfix"] = '',
+    ["content"] = {
+      sel = '',
+      nosel = '',
+    },
+    ["prefix"] = {
+      sel = '',
+      nosel = '',
+    },
+    ["postfix"] = {
+      sel = '',
+      nosel = '',
+    },
   },
+  ---@type {[string]: string}
   text = {
     ["content"] = '',
     ["prefix"] = '',
     ["postfix"] = '',
   },
+  ---@type boolean
+  isSelected = false,
   __drawfunc = function(s)
-    return s.text.prefix .. " " .. s.text.content .. " " .. s.text.postfix
+    return s.text["prefix"] .. " " .. s.text["content"] .. " " .. s.text["postfix"]
   end
 }
 
----Create new store item
+-- ---Create new store item
+-- ---@param o? table
+-- ---@return ZTabPart
+-- function M.ZTabPart:new(o)
+--   o = o or {} -- create object if user does not provide one
+--   setmetatable(o, self)
+--   self.__index = self
+--   return o
+-- end
+
 ---@param o? table
----@return ZTabPart
 function M.ZTabPart:new(o)
-  o = o or {} -- create object if user does not provide one
-  setmetatable(o, self)
+  local idtab = { id = M.id }
+  M.id = M.id + 1
+  local o = vim.tbl_deep_extend('force', idtab, o or {})
   self.__index = self
-  return o
+  return setmetatable(o, self)
 end
 
 ---@return any
@@ -52,9 +71,9 @@ end
 ---@param c? string
 function M.ZTabPart:content(c)
   if c then
-    self.text.content = c
+    self.text["content"] = c
   else
-    return self.text.content
+    return self.text["content"]
   end
 end
 
@@ -63,9 +82,9 @@ end
 ---@param c? string
 function M.ZTabPart:prefix(c)
   if c then
-    self.text.prefix = c
+    self.text["prefix"] = c
   else
-    return self.text.prefix
+    return self.text["prefix"]
   end
 end
 
@@ -74,24 +93,24 @@ end
 ---@param c? string
 function M.ZTabPart:postfix(c)
   if c then
-    self.text.postfix = c
+    self.text["postfix"] = c
   else
-    return self.text.postfix
+    return self.text["postfix"]
   end
 end
 
 ---Get Highlight information
 ---@param n "content" | "prefix" | "postfix" #The name of the element you want the highlight for
----@return string
+---@return {sel: string, nosel: string}
 function M.ZTabPart:getHighlight(n)
   return self.highlight[n]
 end
 
 ---Set Highlight information
 ---@param n "content" | "prefix" | "postfix" #The name of the element you want the highlight for
----@param h string #The highlight group you want it changed to
+---@param h {sel?: string, nosel?: string} #The highlight group you want it changed to
 function M.ZTabPart:setHighlight(n, h)
-  self.highlight[n] = h
+  self.highlight[n] = vim.tbl_deep_extend("force", self.highlight[n], h or {})
 end
 
 return M
