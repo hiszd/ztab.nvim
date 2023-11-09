@@ -357,9 +357,10 @@ local devicon = function(bufnr, isSelected, ntab)
       hldsel = hl_name_dsel
     end
 
-    local selectedHlStart = h.hl(isSelected and hlsel or hldsel)
-    local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, true, false))
-    local rtrn = selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
+    -- local selectedHlStart = h.hl(isSelected and hlsel or hldsel)
+    -- local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, true, false))
+    -- local rtrn = selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
+    local rtrn = icon
     return rtrn
   end
   return ""
@@ -450,4 +451,5 @@ return {
   draw = bufline,
   zbufgoto,
   nbufgoto,
+  devicon,
 }

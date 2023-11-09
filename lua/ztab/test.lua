@@ -1,3 +1,4 @@
+local hlmod = require('ztab.highlight')
 local M = {}
 
 M.id = 0
@@ -28,8 +29,21 @@ M.ZTabPart = {
   },
   ---@type boolean
   isSelected = false,
+  ---@type ZTabPartDrawFunc
   __drawfunc = function(s)
-    return s.text["prefix"] .. " " .. s.text["content"] .. " " .. s.text["postfix"]
+    if s.isSelected then
+      return s:getHighlight("prefix").sel ..
+          s.text["prefix"] ..
+          " " ..
+          s:getHighlight("content").sel .. s.text["content"] .. " " .. s:getHighlight("postfix").sel .. s.text
+          ["postfix"]
+    else
+      return s:getHighlight("prefix").nosel ..
+          s.text["prefix"] ..
+          " " ..
+          s:getHighlight("content").nosel ..
+          s.text["content"] .. " " .. s:getHighlight("postfix").nosel .. s.text["postfix"]
+    end
   end
 }
 
@@ -101,7 +115,16 @@ end
 ---@param n "content" | "prefix" | "postfix" #The name of the element you want the highlight for
 ---@return {sel: string, nosel: string}
 function M.ZTabPart:getHighlight(n)
-  return self.highlight[n]
+  local hl = self.highlight[n]
+  local sel = ""
+  local nosel = ""
+  if hl.sel ~= "" then
+    sel = hlmod.hl(hl.sel)
+  end
+  if hl.nosel ~= "" then
+    nosel = hlmod.hl(hl.nosel)
+  end
+  return { sel, nosel }
 end
 
 ---Set Highlight information
