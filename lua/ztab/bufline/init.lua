@@ -134,13 +134,7 @@ local title = function(bufnr, isSelected)
     }
   })
   titl:setDraw(function(s)
-    if s.isSelected then
-      -- return s:getHighlight('content').sel .. s.text.prefix .. s.text.content .. s.text.postfix
-      return s:getHighlight('content').sel .. s.text.content
-    else
-      -- return s:getHighlight('content').nosel .. s.text.prefix .. s.text.content .. s.text.postfix
-      return s:getHighlight('content').nosel .. s.text.content
-    end
+    return s.text.content
   end)
 
   local rtrn = ''
@@ -425,31 +419,25 @@ local cell = function(bufnr, index)
   return ret
 end
 
----@type {}: ZTabPart
-local cells = {}
-local rendered = ''
-
 ---------------------------------------------------------------------------//
 -- Bufline Constructor
 ---------------------------------------------------------------------------//
 ---@return string #Returns the bufline
 local bufline = function()
-  if M.last_store.bufs ~= M.store.bufs then
-    local trendered = ''
-    for i, e in ipairs(M.store.bufs) do
-      table.insert(cells, cell(e, i))
-    end
-    M.last_store = M.store
+  local line = ''
+  for _, e in ipairs(M.store.bufs) do
+    line = line .. e:draw()
   end
   -- fill the rest with this hl group
   line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, true, true, false)) .. "%="
-  return rendered
+  return line
 end
 
 return {
   _private = M,
   draw = bufline,
-  zbufgoto,
-  nbufgoto,
-  devicon,
+  zbufgoto = zbufgoto,
+  nbufgoto = nbufgoto,
+  devicon = devicon,
+  title = title,
 }
