@@ -11,7 +11,6 @@ local M = {}
 local store = require("ztab.bufline.store"):new()
 
 M.store = store
-M.last_store = store
 
 M.get_listed_buffers = function()
   local bufs_loaded = {}
@@ -398,18 +397,18 @@ local separator = function(index, sel, side)
 end
 
 ---Produce the tab cell
----@param bufnr number #buffer number
----@param index number #Tab index
+---@param ztab number #Tab index
 ---@return string #Tab cell
-local cell = function(bufnr, index)
+local cell = function(ztab)
   local con = require("ztab").helpers.__config
+  local bufnr = M.store:getnbuf(ztab) and M.store:getnbuf(ztab) or 0
   local isSelected = vim.api.nvim_get_current_buf() == bufnr
 
   local spacing = spacer(isSelected)
 
   local ret = ""
   if con.bufline.left_sep then
-    ret = ret .. separator(index, isSelected, "left")
+    ret = ret .. separator(ztab, isSelected, "left")
   end
   ret = ret
       .. spacing
@@ -424,30 +423,23 @@ local cell = function(bufnr, index)
   return ret
 end
 
----@type {}: ZTabPart
-local cells = {}
-local rendered = ''
-
 ---------------------------------------------------------------------------//
 -- Bufline Constructor
 ---------------------------------------------------------------------------//
 ---@return string #Returns the bufline
 local bufline = function()
-  if M.last_store.bufs ~= M.store.bufs then
-    local trendered = ''
-    for i, e in ipairs(M.store.bufs) do
-      table.insert(cells, cell(e, i))
-    end
-    M.last_store = M.store
+  local line = ""
+  for i = 1, M.store.bufcount, 1 do
+    line = line .. cell(i)
   end
   -- fill the rest with this hl group
   line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, true, true, false)) .. "%="
-  return rendered
+  return line
 end
 
 return {
   _private = M,
   draw = bufline,
-  zbufgoto,
-  nbufgoto,
+  zbufgoto = zbufgoto,
+  nbufgoto = nbufgoto,
 }

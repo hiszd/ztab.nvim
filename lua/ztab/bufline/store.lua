@@ -1,35 +1,32 @@
 local dP = require('ztab.utils').dP
+local test = require('ztab.test')
 
-Store = {
-  ---@type table<number, number>
-  bufs = {},
-  ---@type number
-  bufcount = 0,
+---@class BufTab
+BufTab = {
+  ---Neovim buffer number
+  ---@type number | nil
+  number = nil,
+  ---@type ZTabPart
+  parts = {}
 }
 
-function Store:changed()
-  for _, value in pairs(self.bufs) do
-    if self:buffilter(value) then
-      dP({ "nnn", vim.api.nvim_buf_get_name(value), value })
-    else
-      dP({ "bufrm", value })
-      local zbuf = self:getzbuf(value)
-      if zbuf ~= nil then
-        table.remove(self.bufs, zbuf)
-        self.bufcount = self.bufcount - 1
-      end
-    end
-  end
-end
+local id = 0
+
+---@class Store
+Store = {
+  ---@type {}: BufTab
+  bufs = {},
+}
 
 ---Create new store item
 ---@param o table? #table that would be made into a store
----@return any
+---@return Store
 function Store:new(o)
-  o = o or {} -- create object if user does not provide one
-  setmetatable(o, self)
+  local idstor = { id = id }
+  id = id + 1
+  local o = vim.tbl_deep_extend('force', idstor, o or {})
   self.__index = self
-  return o
+  return setmetatable(o, self)
 end
 
 ---Replace the buffers int the Store with bufs
@@ -67,7 +64,7 @@ end
 ---@param nbuf number #neovim buffer id
 function Store:addbuf(nbuf)
   if self:buffilter(nbuf) then
-    local len = self.bufcount
+    local len = table.maxn(self.bufs)
     if self:getzbuf(nbuf) == nil then
       table.insert(self.bufs, len + 1, nbuf)
       self.bufcount = len + 1

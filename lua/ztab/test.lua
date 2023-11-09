@@ -1,5 +1,3 @@
-require('ztab.class')
-
 local M = {}
 
 M.id = 0

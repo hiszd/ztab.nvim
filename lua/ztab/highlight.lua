@@ -20,6 +20,8 @@ end
 
 local M = {}
 
+-- TODO: change (sel, pfix, buf, tab) into a table so that the defaults can be merged into the table from a defaults table
+
 --- Get highlight name with or without prefix based on selection
 ---@param hl_name string #Highlight name
 ---@param sel boolean? #Is tab selected
