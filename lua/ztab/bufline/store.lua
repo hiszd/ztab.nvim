@@ -11,7 +11,7 @@ BufTab = {
   ---@type number | nil
   nbuf = nil,
   ---@type boolean
-  isSelected = false,
+  isSelected = true,
   ---@type {lsep: ZTabPart, title: ZTabPart, status: ZTabPart, devicon: ZTabPart, rsep: ZTabPart }
   parts = {
   }
@@ -32,7 +32,9 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.separator, false, true, true, false))
           },
         },
-        content = constants.sep_chars[sep.type][1]
+        text = {
+          ["content"] = constants.sep_chars[sep.type][1]
+        },
       }),
       title = test.ZTabPart:new({
         highlight = {
@@ -41,7 +43,10 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, false, true, true, false))
           },
         },
-        content = require('ztab.bufline').title(bufnr, self.isSelected)
+        text = {
+          ["content"] = require('ztab.bufline').title(bufnr, self.isSelected)
+        },
+        updateContent = function() require('ztab.bufline').title(bufnr, self.isSelected) end
       }),
       status = test.ZTabPart:new({
         highlight = {
@@ -50,7 +55,9 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.modified, false, true, true, false))
           },
         },
-        content = ' '
+        text = {
+          ["content"] = ' '
+        },
       }),
       devicon = test.ZTabPart:new({
         highlight = {
@@ -59,7 +66,9 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.modified, false, true, true, false))
           },
         },
-        content = require('ztab.bufline').devicon(bufnr, self.isSelected, false)
+        text = {
+          ["content"] = require('ztab.bufline').devicon(bufnr, self.isSelected, false)
+        },
       }),
       rsep = test.ZTabPart:new({
         highlight = {
@@ -68,7 +77,9 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.separator, false, true, true, false))
           },
         },
-        content = constants.sep_chars[sep.type][2]
+        text = {
+          ["content"] = constants.sep_chars[sep.type][2]
+        },
       }),
     }
   }
@@ -76,7 +87,20 @@ function BufTab:new(bufnr, sep)
   return setmetatable(o, self)
 end
 
+function BufTab:updateSelected(s)
+  self.isSelected = vim.api.nvim_get_current_buf() == self.nbuf
+end
+
+local amnt = 0
+
 function BufTab:draw()
+  self:updateSelected()
+  if amnt < 2 then
+    for i, n in pairs(self.parts) do
+      require('ztab.utils').dP(n)
+    end
+    amnt = amnt + 1
+  end
   local line = ''
   line = line .. self.parts.lsep:draw()
   line = line .. self.parts.title:draw()
@@ -100,7 +124,7 @@ Store = {
 function Store:new(o)
   local idstor = { id = id }
   id = id + 1
-  local o = vim.tbl_deep_extend('force', idstor, o or {})
+  o = vim.tbl_deep_extend('force', idstor, o or {})
   self.__index = self
   return setmetatable(o, self)
 end

@@ -4,45 +4,41 @@ local M = {}
 M.id = 0
 ---@alias ZTabPartDrawFunc fun(s: ZTabPart): string
 
+---@alias ZTabPartDivs "content" | "postfix" | "prefix"
+
+-- TODO: how to handle dynamic content? Need a fetcher?
 ---@class ZTabPart
 M.ZTabPart = {
-  ---@type {[string]: {sel: string, nosel: string}}
-  highlight = {
-    ["content"] = {
-      sel = '',
-      nosel = '',
-    },
-    ["prefix"] = {
-      sel = '',
-      nosel = '',
-    },
-    ["postfix"] = {
-      sel = '',
-      nosel = '',
-    },
-  },
-  ---@type {[string]: string}
-  text = {
-    ["content"] = '',
-    ["prefix"] = '',
-    ["postfix"] = '',
-  },
+  ---@type {[ZTabPartDivs]: {sel: string, nosel: string}}
+  highlight = {},
+  ---@type {[ZTabPartDivs]: string | fun(): string}
+  text = {},
   ---@type boolean
   isSelected = false,
+  updateSelected = function()
+  end,
+  updateContent = function()
+  end,
+  updatePrefix = function()
+  end,
+  updatePostfix = function()
+  end,
   ---@type ZTabPartDrawFunc
   __drawfunc = function(s)
     if s.isSelected then
       return s:getHighlight("prefix").sel ..
-          s.text["prefix"] ..
+          (s.text["prefix"] and s.text["prefix"] or "") ..
           " " ..
-          s:getHighlight("content").sel .. s.text["content"] .. " " .. s:getHighlight("postfix").sel .. s.text
-          ["postfix"]
+          s:getHighlight("content").sel ..
+          (s.text["content"] and s.text["content"] or "") ..
+          " " .. s:getHighlight("postfix").sel .. (s.text["postfix"] and s.text["postfix"] or "")
     else
       return s:getHighlight("prefix").nosel ..
-          s.text["prefix"] ..
+          (s.text["prefix"] and s.text["prefix"] or "") ..
           " " ..
           s:getHighlight("content").nosel ..
-          s.text["content"] .. " " .. s:getHighlight("postfix").nosel .. s.text["postfix"]
+          (s.text["content"] and s.text["content"] or "") ..
+          " " .. s:getHighlight("postfix").nosel .. (s.text["postfix"] and s.text["postfix"] or "")
     end
   end
 }
@@ -61,37 +57,49 @@ M.ZTabPart = {
 function M.ZTabPart:new(o)
   local idtab = { id = M.id }
   M.id = M.id + 1
-  local o = vim.tbl_deep_extend('force', idtab, o or {})
+  o = vim.tbl_deep_extend('force', idtab, o or {})
   self.__index = self
   return setmetatable(o, self)
 end
 
 ---@return any
 function M.ZTabPart:draw()
-  return M.ZTabPart.__drawfunc(self)
+  self.updateSelected()
+  self.updateContent()
+  self.updatePrefix()
+  self.updatePostfix()
+  return self.__drawfunc(self)
 end
 
 ---Provide a custom rendering function for the part
 ---@param f ZTabPartDrawFunc #the function to draw the part
 ---@return nil
 function M.ZTabPart:setDraw(f)
-  M.ZTabPart.__drawfunc = f
+  self.__drawfunc = f
 end
 
 ---If c ~= nil then set self.text.content to c, else return self.text.content
 ---@return string | nil
----@param c? string
+---@param c? string | fun(): string
 function M.ZTabPart:content(c)
   if c then
     self.text["content"] = c
   else
-    return self.text["content"]
+    if self.text["content"] then
+      if type(self.text["content"]) == "function" then
+        return self.text:content()
+      elseif type(self.text["content"]) == "string" then
+        return tostring(self.text["content"])
+      else
+        return nil
+      end
+    end
   end
 end
 
 ---If c ~= nil then set self.text.prefix to c, else return self.text.prefix
----@return string | nil
----@param c? string
+---@return string | function | nil
+---@param c? string | function
 function M.ZTabPart:prefix(c)
   if c then
     self.text["prefix"] = c
@@ -101,8 +109,8 @@ function M.ZTabPart:prefix(c)
 end
 
 ---If c ~= nil then set self.text.postfix to c, else return self.text.postfix
----@return string | nil
----@param c? string
+---@return string | function | nil
+---@param c? string | function
 function M.ZTabPart:postfix(c)
   if c then
     self.text["postfix"] = c
@@ -112,23 +120,19 @@ function M.ZTabPart:postfix(c)
 end
 
 ---Get Highlight information
----@param n "content" | "prefix" | "postfix" #The name of the element you want the highlight for
+---@param n ZTabPartDivs #The name of the element you want the highlight for
 ---@return {sel: string, nosel: string}
 function M.ZTabPart:getHighlight(n)
   local hl = self.highlight[n]
-  local sel = ""
-  local nosel = ""
-  if hl.sel ~= "" then
-    sel = hlmod.hl(hl.sel)
+  if hl then
+    return { sel = hl.sel, nosel = hl.nosel }
+  else
+    return { sel = "", nosel = "" }
   end
-  if hl.nosel ~= "" then
-    nosel = hlmod.hl(hl.nosel)
-  end
-  return { sel, nosel }
 end
 
 ---Set Highlight information
----@param n "content" | "prefix" | "postfix" #The name of the element you want the highlight for
+---@param n ZTabPartDivs #The name of the element you want the highlight for
 ---@param h {sel?: string, nosel?: string} #The highlight group you want it changed to
 function M.ZTabPart:setHighlight(n, h)
   self.highlight[n] = vim.tbl_deep_extend("force", self.highlight[n], h or {})

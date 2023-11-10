@@ -11,7 +11,6 @@ local M = {}
 local store = require("ztab.bufline.store"):new()
 
 M.store = store
-M.last_store = store
 
 M.get_listed_buffers = function()
   local bufs_loaded = {}
