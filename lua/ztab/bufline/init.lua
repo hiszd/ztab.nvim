@@ -54,7 +54,7 @@ local zbufgoto = function(zbuf)
   local nbuf = M.store:getnbuf(zbuf)
   -- print("berts")
   -- print(nbuf)
-  if nbuf then
+  if nbuf ~= nil then
     vim.api.nvim_set_current_buf(nbuf)
   end
 end

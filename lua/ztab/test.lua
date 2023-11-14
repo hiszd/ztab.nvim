@@ -1,4 +1,5 @@
 local hlmod = require('ztab.highlight')
+local dP = require('ztab.utils').dP
 local M = {}
 
 M.id = 0
@@ -28,17 +29,15 @@ M.ZTabPart = {
     if s.isSelected then
       return s:getHighlight("prefix").sel ..
           (s.text["prefix"] and s.text["prefix"] or "") ..
-          " " ..
           s:getHighlight("content").sel ..
           (s.text["content"] and s.text["content"] or "") ..
-          " " .. s:getHighlight("postfix").sel .. (s.text["postfix"] and s.text["postfix"] or "")
+          s:getHighlight("postfix").sel .. (s.text["postfix"] and s.text["postfix"] or "")
     else
       return s:getHighlight("prefix").nosel ..
           (s.text["prefix"] and s.text["prefix"] or "") ..
-          " " ..
           s:getHighlight("content").nosel ..
           (s.text["content"] and s.text["content"] or "") ..
-          " " .. s:getHighlight("postfix").nosel .. (s.text["postfix"] and s.text["postfix"] or "")
+          s:getHighlight("postfix").nosel .. (s.text["postfix"] and s.text["postfix"] or "")
     end
   end
 }

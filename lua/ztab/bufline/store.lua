@@ -94,19 +94,25 @@ end
 local amnt = 0
 
 function BufTab:draw()
+  -- get this functional
   self:updateSelected()
+  local lsep = self.parts.lsep:draw()
+  local title = self.parts.title:draw()
+  local status = self.parts.status:draw()
+  local devicon = self.parts.devicon:draw()
+  local rsep = self.parts.rsep:draw()
   if amnt < 2 then
     for i, n in pairs(self.parts) do
-      require('ztab.utils').dP(n)
+      dP({ lsep, title, status, devicon, rsep })
     end
     amnt = amnt + 1
   end
   local line = ''
-  line = line .. self.parts.lsep:draw()
-  line = line .. self.parts.title:draw()
-  line = line .. self.parts.status:draw()
-  line = line .. self.parts.devicon:draw()
-  line = line .. self.parts.rsep:draw()
+  line = line .. lsep
+  line = line .. title
+  line = line .. status
+  line = line .. devicon
+  line = line .. rsep
   return line
 end
 
@@ -132,6 +138,10 @@ end
 ---Remove buffer by Neovim buffer id
 ---@param nbuf number #neovim buffer id
 function Store:remnbuf(nbuf)
+  local zbuf = self:getzbuf(nbuf)
+  if zbuf ~= nil then
+    table.remove(self.bufs, zbuf)
+  end
 end
 
 ---Add buffer to ztab list by neovim buffer id
@@ -162,7 +172,18 @@ end
 ---@param ztabbuf number #ztab buffer tab number
 ---@return number | nil #nvim buffer number
 function Store:getnbuf(ztabbuf)
-  return self.bufs[ztabbuf].nbuf
+  local ztab = tonumber(ztabbuf)
+  local buftab = nil
+  for i, n in ipairs(self.bufs) do
+    if i == ztab then
+      buftab = n.nbuf
+    end
+  end
+  if buftab then
+    return buftab
+  else
+    return nil
+  end
 end
 
 ---@param bufnr number #Buffer number to run filter on
