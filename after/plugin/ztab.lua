@@ -1,6 +1,13 @@
-local dP = require('ztab.utils').dP
+local utils = require('ztab.utils')
 
 -- Buffer events
+
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  callback = function(info)
+    require("ztab.bufline")._private.store:updateSelected(info.buf)
+  end,
+})
+
 vim.api.nvim_create_autocmd({ "BufDelete", "BufUnload" }, {
   callback = function(info)
     local zbuf = require("ztab.bufline")._private.store:getzbuf(info.buf)

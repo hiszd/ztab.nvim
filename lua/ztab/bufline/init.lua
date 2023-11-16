@@ -102,10 +102,10 @@ local spacer = function(isSelected)
     }
   })
   spcr:content(" ")
-  if t1 == false then
-    P(spcr)
-    t1 = true
-  end
+  -- if t1 == false then
+  --   P(spcr)
+  --   t1 = true
+  -- end
 
   return spcr:draw()
 end
@@ -161,10 +161,10 @@ local title = function(bufnr, isSelected)
 
   titl:content(rtrn)
 
-  if t2 == false then
-    P(titl)
-    t2 = true
-  end
+  -- if t2 == false then
+  --   P(titl)
+  --   t2 = true
+  -- end
 
   return titl:draw()
 end
@@ -425,7 +425,7 @@ end
 local bufline = function()
   local line = ''
   for _, e in ipairs(M.store.bufs) do
-    line = line .. e:draw()
+    line = line .. e:draw(require('ztab').helpers.__config.bufline.sep_name)
   end
   -- fill the rest with this hl group
   line = line .. highlight.hl(highlight.get_hl_name(constants.highlight_names.fill, false, true, true, false)) .. "%="

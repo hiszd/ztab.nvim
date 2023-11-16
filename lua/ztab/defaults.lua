@@ -29,22 +29,7 @@ M.__config = {
     wtabhighlight = highlight.default_hl(true, constants.sep_names.thick),
   },
   opts = {
-    debug = true,
-    tabline = {
-      highlight = {},
-      sep_name = constants.sep_names.thick,
-      left_sep = false,
-      right_sep = true,
-      devicon_colors = "selected",
-    },
-    bufline = {
-      highlight = {},
-      wtabhighlight = {},
-      sep_name = constants.sep_names.thick,
-      left_sep = false,
-      right_sep = true,
-      devicon_colors = "selected",
-    },
+    debug = false,
   },
 }
 

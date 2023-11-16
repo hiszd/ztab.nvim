@@ -21,7 +21,7 @@ M.indicator = "▎"
 
 ---@type table<string, string>
 M.hl_appends = {
-      ["selected"] = "Selected",
+  ["selected"] = "Selected",
 }
 
 ---@type table
@@ -40,27 +40,29 @@ M.highlight_names = highlight_names
 
 ---@type table<string, string>
 M.highlight_vars = {
-      [highlight_names.separator] = "separator",
-      [PREFIX .. "_" .. highlight_names.separator] = "separator",
-      [highlight_names.separator_sel] = "separator_sel",
-      [PREFIX .. "_" .. highlight_names.separator_sel] = "separator_sel",
-      [highlight_names.title] = "title",
-      [PREFIX .. "_" .. highlight_names.title] = "title",
-      [highlight_names.title_sel] = "title_sel",
-      [PREFIX .. "_" .. highlight_names.title_sel] = "title_sel",
-      [highlight_names.modified] = "modified",
-      [PREFIX .. "_" .. highlight_names.modified] = "modified",
-      [highlight_names.modified_sel] = "modified_sel",
-      [PREFIX .. "_" .. highlight_names.modified_sel] = "modified_sel",
-      [highlight_names.icon] = "icon",
-      [PREFIX .. "_" .. highlight_names.icon] = "icon",
-      [highlight_names.icon_sel] = "icon_sel",
-      [PREFIX .. "_" .. highlight_names.icon_sel] = "icon_sel",
-      [highlight_names.fill] = "fill",
-      [PREFIX .. "_" .. highlight_names.fill] = "fill",
+  [highlight_names.separator] = "separator",
+  [PREFIX .. "_" .. highlight_names.separator] = "separator",
+  [highlight_names.separator_sel] = "separator_sel",
+  [PREFIX .. "_" .. highlight_names.separator_sel] = "separator_sel",
+  [highlight_names.title] = "title",
+  [PREFIX .. "_" .. highlight_names.title] = "title",
+  [highlight_names.title_sel] = "title_sel",
+  [PREFIX .. "_" .. highlight_names.title_sel] = "title_sel",
+  [highlight_names.modified] = "modified",
+  [PREFIX .. "_" .. highlight_names.modified] = "modified",
+  [highlight_names.modified_sel] = "modified_sel",
+  [PREFIX .. "_" .. highlight_names.modified_sel] = "modified_sel",
+  [highlight_names.icon] = "icon",
+  [PREFIX .. "_" .. highlight_names.icon] = "icon",
+  [highlight_names.icon_sel] = "icon_sel",
+  [PREFIX .. "_" .. highlight_names.icon_sel] = "icon_sel",
+  [highlight_names.fill] = "fill",
+  [PREFIX .. "_" .. highlight_names.fill] = "fill",
 }
 
----@type table
+---@alias ZTabSepStrings {thin: string, thick: string, slant: string, slope: string, padded_slant: string}
+
+---@type ZTabSepStrings
 M.sep_names = {
   thin = "thin",
   thick = "thick",
@@ -71,11 +73,11 @@ M.sep_names = {
 
 ---@type table<string, string[]>
 M.sep_chars = {
-      [M.sep_names.thin] = { "▕", "▏" },
-      [M.sep_names.thick] = { "▐", "▌" },
-      [M.sep_names.slant] = { "", "" },
-      [M.sep_names.slope] = { "", "" },
-      [M.sep_names.padded_slant] = { "" .. M.padding, "" .. M.padding },
+  [M.sep_names.thin] = { "▕", "▏" },
+  [M.sep_names.thick] = { "▐", "▌" },
+  [M.sep_names.slant] = { "", "" },
+  [M.sep_names.slope] = { "", "" },
+  [M.sep_names.padded_slant] = { "" .. M.padding, "" .. M.padding },
 }
 
 ---@type string

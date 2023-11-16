@@ -1,4 +1,4 @@
-local dP = require('ztab.utils').dP
+local utils = require('ztab.utils')
 local test = require('ztab.test')
 local constants = require('ztab.constants')
 local highlight = require('ztab.highlight')
@@ -33,7 +33,7 @@ function BufTab:new(bufnr, sep)
           },
         },
         text = {
-          ["content"] = constants.sep_chars[sep.type][1]
+          ["content"] = constants.sep_chars[sep.type][2] .. " "
         },
       }),
       title = test.ZTabPart:new({
@@ -56,7 +56,7 @@ function BufTab:new(bufnr, sep)
           },
         },
         text = {
-          ["content"] = ' '
+          ["content"] = '   '
         },
       }),
       devicon = test.ZTabPart:new({
@@ -78,7 +78,7 @@ function BufTab:new(bufnr, sep)
           },
         },
         text = {
-          ["content"] = constants.sep_chars[sep.type][2]
+          ["content"] = " " .. constants.sep_chars[sep.type][1]
         },
       }),
     }
@@ -87,24 +87,33 @@ function BufTab:new(bufnr, sep)
   return setmetatable(o, self)
 end
 
+---@param s boolean
 function BufTab:updateSelected(s)
-  self.isSelected = vim.api.nvim_get_current_buf() == self.nbuf
+  self.isSelected = s
 end
 
 local amnt = 0
 
-function BufTab:draw()
+---@param type ZTabSepStrings
+function BufTab:draw(type)
+  for k, _ in pairs(self.parts) do
+    if (type ~= "slant" or type ~= "padded_slant") then
+      if (k ~= "lsep" or k ~= "rsep") then
+        self.parts[k].isSelected = self.isSelected
+      else
+        self.parts[k].isSelected = false
+      end
+    else
+      self.parts[k].isSelected = self.isSelected
+    end
+  end
   -- get this functional
-  self:updateSelected()
   local lsep = self.parts.lsep:draw()
   local title = self.parts.title:draw()
   local status = self.parts.status:draw()
   local devicon = self.parts.devicon:draw()
   local rsep = self.parts.rsep:draw()
   if amnt < 2 then
-    for i, n in pairs(self.parts) do
-      dP({ lsep, title, status, devicon, rsep })
-    end
     amnt = amnt + 1
   end
   local line = ''
@@ -191,35 +200,45 @@ end
 function Store:buffilter(bufnr)
   local bufinfo = vim.fn.getbufinfo(bufnr)[1]
   if bufinfo == nil then
-    dP({ bufnr, "info=null" })
+    utils.dP({ bufnr, "info=null" })
     return false
   end
   local ft = vim.fn.getbufvar(bufnr, "&filetype")
   local hidden = bufinfo.hidden == 1
   if bufinfo.name == "" or nil then
-    dP({ bufnr, "name=null" })
+    utils.dP({ bufnr, "name=null" })
     return false
   end
   if ft == "" or nil then
     return false
   end
   if not vim.api.nvim_buf_is_loaded(bufnr) then
-    dP({ bufnr, "loaded=false" })
+    utils.dP({ bufnr, "loaded=false" })
     return false
   end
   if not (tonumber(vim.api.nvim_buf_line_count(bufnr)) > 0) then
-    dP({ bufnr, "lines<=0 " })
+    utils.dP({ bufnr, "lines<=0 " })
     -- print(vim.api.nvim_buf_line_count(bufnr) .. " buf:" .. bufnr)
     return false
   end
   if hidden then
-    dP({ bufnr, "hidden=true" })
+    utils.dP({ bufnr, "hidden=true" })
     -- return false
   end
 
   -- print(vim.api.nvim_buf_line_count(bufnr) .. " buf:" .. bufnr)
-  dP({ bufnr, "pass" })
+  utils.dP({ bufnr, "pass" })
   return true
+end
+
+function Store:updateSelected(nbuf)
+  for k, v in pairs(self.bufs) do
+    if v.nbuf == nbuf then
+      self.bufs[k].isSelected = true
+    else
+      self.bufs[k].isSelected = false
+    end
+  end
 end
 
 return Store

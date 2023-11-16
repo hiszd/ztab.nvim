@@ -1,5 +1,5 @@
 ---@type boolean
-local debug = false
+local debug = true
 ---@type number
 -- local count = 0
 
@@ -11,6 +11,8 @@ M.dP = function(...)
   if debug then
     print(vim.inspect(...))
     -- count = count + 1
+  else
+    print("Debug disabled")
   end
 end
 

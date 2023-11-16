@@ -1,5 +1,5 @@
-local hlmod = require('ztab.highlight')
-local dP = require('ztab.utils').dP
+-- local hlmod = require('ztab.highlight')
+-- local dP = require('ztab.utils').dP
 local M = {}
 
 M.id = 0
@@ -16,13 +16,14 @@ M.ZTabPart = {
   text = {},
   ---@type boolean
   isSelected = false,
-  updateSelected = function()
+  ---@type fun(s: ZTabPart): nil
+  updateContent = function(s)
   end,
-  updateContent = function()
+  ---@type fun(s: ZTabPart): nil
+  updatePrefix = function(s)
   end,
-  updatePrefix = function()
-  end,
-  updatePostfix = function()
+  ---@type fun(s: ZTabPart): nil
+  updatePostfix = function(s)
   end,
   ---@type ZTabPartDrawFunc
   __drawfunc = function(s)
@@ -63,10 +64,9 @@ end
 
 ---@return any
 function M.ZTabPart:draw()
-  self.updateSelected()
-  self.updateContent()
-  self.updatePrefix()
-  self.updatePostfix()
+  self:updateContent()
+  self:updatePrefix()
+  self:updatePostfix()
   return self.__drawfunc(self)
 end
 

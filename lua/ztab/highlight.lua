@@ -1,6 +1,6 @@
 require("ztab.types")
 local constants = require("ztab.constants")
-local dP = require("ztab.utils").dP
+local utils = require("ztab.utils")
 
 local fmt = string.format
 
@@ -110,7 +110,7 @@ M.create_component_highlight_group = function(color, highlight_tag)
     end
   else
     print("need to specify a background and foreground color")
-    dP(color)
+    utils.dP(color)
   end
   return ""
 end
@@ -151,7 +151,7 @@ M.update_component_highlight_group = function(color, highlight_tag, pfix, buf, t
     return highlight_group_name
   else
     print("need to specify a background and foreground color")
-    dP(color)
+    utils.dP(color)
   end
   return ""
 end
@@ -160,49 +160,94 @@ end
 ---@param color_group string #Highlight group name
 ---@return ZTabHighlightGroup #Returns highlight group color information
 M.extract_highlight_colors = function(color_group)
+  local d = false
+  if color_group == "TabLine" then
+    d = true
+  end
+  local function dbg(...)
+    if d then
+      utils.dP(...)
+    end
+  end
   local rtrn = { bg = "", fg = "", found = false }
+  dbg({ hlexists = vim.fn.hlexists(color_group) })
   if vim.fn.hlexists(color_group) == 0 then
     return rtrn
   end
-  local color = vim.api.nvim_get_hl_by_name(color_group, true)
-  if color.foreground == nil or color.background == nil then
+  local color = vim.api.nvim_get_hl(0, { name = color_group })
+  dbg({ color = color })
+  if color.fg == nil and color.bg == nil then
     return rtrn
   end
-  if color.background ~= nil then
-    rtrn.bg = string.format("#%06x", color.background)
+  if color.bg ~= nil then
+    rtrn.bg = string.format("#%06x", color.bg)
     rtrn.found = true
   end
-  if color.foreground ~= nil then
-    rtrn.fg = string.format("#%06x", color.foreground)
+  if color.fg ~= nil then
+    rtrn.fg = string.format("#%06x", color.fg)
     rtrn.found = true
   end
   return rtrn
 end
 
+local function isnilorempty(s)
+  if s == nil or (type(s) == "string" and s == "") then
+    return true
+  end
+  return false
+end
+
+---@param op string #Operation to perform
+---@param t1 table #First table
+---@param t2 table #Second table
+---@return table #Result
+local function cust_extend(op, t1, t2)
+  local rtrn = {}
+  if op == "force" then
+    for k, v in pairs(t1) do
+      if not isnilorempty(t2[k]) then
+        rtrn[k] = t2[k]
+      end
+    end
+  elseif op == "keep" then
+    for k, v in pairs(t2) do
+      if isnilorempty(t1[k]) then
+        rtrn[k] = v
+      else
+        rtrn[k] = t1[k]
+      end
+    end
+  end
+  return rtrn
+end
+
+M.cust_extend = cust_extend
+
 M.defaulthlcols = function()
   local defaultcols = { bg = "#FFFFFF", fg = "#000000" }
 
   local normhl = M.extract_highlight_colors("Normal")
-  normhl = vim.tbl_deep_extend("force", defaultcols, normhl)
+  normhl = cust_extend("keep", normhl, defaultcols)
   local defaulthl = M.extract_highlight_colors("TabLine")
-  defaulthl = vim.tbl_deep_extend("force", defaultcols, defaulthl)
+  print(vim.inspect({ defaulthl = defaulthl }))
+  defaulthl = cust_extend("keep", defaulthl, normhl)
   local defaultfillhl = M.extract_highlight_colors("TabLineFill")
-  defaultfillhl = vim.tbl_deep_extend("force", defaultcols, defaultfillhl)
+  defaultfillhl = cust_extend("keep", defaultfillhl, normhl)
   local defaultselhl = M.extract_highlight_colors("TabLineSel")
-  defaultselhl = vim.tbl_deep_extend("force", defaultcols, defaultselhl)
+  defaultselhl = cust_extend("keep", defaultselhl, normhl)
 
   local fillcol = defaultfillhl
   local inactivecol = defaulthl
   local activecol = defaultselhl
-  if defaulthl.bg == defaultselhl.bg then
-    activecol = normhl
-  end
+  local normcol = normhl
+
+  utils.dP({ normcol = normcol, inactivecol = inactivecol, defaultcols = defaultcols })
 
   return { fillcol = fillcol, inactivecol = inactivecol, activecol = activecol }
 end
 
 ---@param w boolean? #Is this with or without tabline
----@param type string? #Is this with or without tabline
+---@param type string? #Type of the seperator
 M.default_hl = function(w, type)
   local defhl = M.defaulthlcols()
   local fillcol = defhl.fillcol
@@ -211,9 +256,15 @@ M.default_hl = function(w, type)
   ---@type ZTabHighlightOpts
   local rtrn = {
     ["separator_sel"] = {
-      fg = fillcol.fg,
+      fg = activecol.fg,
       bg = activecol.bg,
       sp = activecol.fg,
+      underline = false,
+    },
+    ["separator"] = {
+      fg = inactivecol.fg,
+      bg = inactivecol.bg,
+      sp = inactivecol.fg,
       underline = false,
     },
     ["title_sel"] = {
@@ -263,12 +314,6 @@ M.default_hl = function(w, type)
         sp = activecol.fg,
         underline = false,
       },
-      ["separator"] = {
-        fg = fillcol.bg,
-        bg = activecol.bg,
-        sp = inactivecol.fg,
-        underline = false,
-      },
     }, rtrn)
     --If this is without tabs
   else
@@ -291,32 +336,28 @@ M.default_hl = function(w, type)
         sp = inactivecol.fg,
         underline = false,
       },
-      ["separator"] = {
-        fg = fillcol.bg,
-        bg = inactivecol.bg,
-        sp = inactivecol.fg,
-        underline = false,
-      },
     }, rtrn)
   end
 
-  -- If the type of tab is any slant the default behavior is to look like a tab
-  if type ~= constants.sep_names.thin and type ~= constants.sep_names.thick then
-    rtrn = vim.tbl_deep_extend("keep", {
-      ["separator"] = {
-        fg = inactivecol.bg,
-        bg = inactivecol.bg,
-        sp = inactivecol.fg,
-        underline = false,
-      },
-      ["separator_sel"] = {
-        fg = fillcol.bg,
-        bg = activecol.bg,
-        sp = activecol.fg,
-        underline = false,
-      },
-    }, rtrn)
-  end
+  -- -- If the type of tab is any slant the default behavior is to look like a tab
+  -- if type ~= constants.sep_names.thin and type ~= constants.sep_names.thick then
+  --   rtrn = vim.tbl_deep_extend("keep", {
+  --     ["separator"] = {
+  --       fg = fillcol.bg,
+  --       bg = inactivecol.bg,
+  --       sp = inactivecol.fg,
+  --       underline = false,
+  --     },
+  --     ["separator_sel"] = {
+  --       fg = fillcol.bg,
+  --       bg = activecol.bg,
+  --       sp = activecol.fg,
+  --       underline = false,
+  --     },
+  --   }, rtrn)
+  -- end
+
+  -- utils.dP({ rtrn = rtrn })
 
   return rtrn
 end
