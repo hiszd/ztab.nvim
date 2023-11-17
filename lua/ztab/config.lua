@@ -23,8 +23,6 @@ M.setup = function(C, opts)
     require('ztab.utils').setDebug(true)
   end
 
-  utils.dP({ tablinesel = highlight.extract_highlight_colors("TabLineSel") })
-
   local defaulthltab = highlight.default_hl(true, C.tabline.sep_name)
   local hltabtmp = vim.tbl_deep_extend("force", defaulthltab, opts.tabline.highlight)
   -- utils.dP({ hltabtmp = hltabtmp, defaulthltab = defaulthltab })

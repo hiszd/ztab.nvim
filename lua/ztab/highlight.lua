@@ -86,34 +86,31 @@ end
 ---@param item string #Highlight group
 ---@return string #Returns formatted string matching tabline highlight syntax
 function M.hl(item)
-  if not item then
-    return ""
-  end
   return fmt("%%#%s#", item)
 end
 
----Create highlight group for the highlight_tag with prefix added,
----if the group doesn't already exist, and return the group name
----@param color ZTabHighlightGroup #Highlight group information
----@param highlight_tag string #Highlight group name without prefix
----@return string #Complete highlight group name
-M.create_component_highlight_group = function(color, highlight_tag)
-  if color.bg and color.fg then
-    local highlight_group_name = table.concat({ constants.PREFIX, highlight_tag }, "_")
-    if vim.fn.hlexists(highlight_group_name) == 0 then
-      vim.api.nvim_set_hl(
-        0,
-        highlight_group_name,
-        { fg = color.fg, bg = color.bg, sp = (color.sp and color.sp or color.fg), underline = color.underline }
-      )
-      return highlight_group_name
-    end
-  else
-    print("need to specify a background and foreground color")
-    utils.dP(color)
-  end
-  return ""
-end
+-- ---Create highlight group for the highlight_tag with prefix added,
+-- ---if the group doesn't already exist, and return the group name
+-- ---@param color ZTabHighlightGroup #Highlight group information
+-- ---@param highlight_tag string #Highlight group name without prefix
+-- ---@return string #Complete highlight group name
+-- M.create_component_highlight_group = function(color, highlight_tag)
+--   if color.bg and color.fg then
+--     local highlight_group_name = table.concat({ constants.PREFIX, highlight_tag }, "_")
+--     if vim.fn.hlexists(highlight_group_name) == 0 then
+--       vim.api.nvim_set_hl(
+--         0,
+--         highlight_group_name,
+--         { fg = color.fg, bg = color.bg, sp = (color.sp and color.sp or color.fg), underline = color.underline }
+--       )
+--       return highlight_group_name
+--     end
+--   else
+--     print("need to specify a background and foreground color")
+--     utils.dP(color)
+--   end
+--   return ""
+-- end
 
 --- Update highlight group for the highlight_tag with prefix added and return the group name
 ---@param color ZTabHighlightGroup #Highlight group information
@@ -160,22 +157,11 @@ end
 ---@param color_group string #Highlight group name
 ---@return ZTabHighlightGroup #Returns highlight group color information
 M.extract_highlight_colors = function(color_group)
-  local d = false
-  if color_group == "TabLine" then
-    d = true
-  end
-  local function dbg(...)
-    if d then
-      utils.dP(...)
-    end
-  end
   local rtrn = { bg = "", fg = "", found = false }
-  dbg({ hlexists = vim.fn.hlexists(color_group) })
   if vim.fn.hlexists(color_group) == 0 then
     return rtrn
   end
   local color = vim.api.nvim_get_hl(0, { name = color_group })
-  dbg({ color = color })
   if color.fg == nil and color.bg == nil then
     return rtrn
   end
@@ -229,7 +215,7 @@ M.defaulthlcols = function()
   local normhl = M.extract_highlight_colors("Normal")
   normhl = cust_extend("keep", normhl, defaultcols)
   local defaulthl = M.extract_highlight_colors("TabLine")
-  print(vim.inspect({ defaulthl = defaulthl }))
+  -- print(vim.inspect({ defaulthl = defaulthl }))
   defaulthl = cust_extend("keep", defaulthl, normhl)
   local defaultfillhl = M.extract_highlight_colors("TabLineFill")
   defaultfillhl = cust_extend("keep", defaultfillhl, normhl)
@@ -241,7 +227,7 @@ M.defaulthlcols = function()
   local activecol = defaultselhl
   local normcol = normhl
 
-  utils.dP({ normcol = normcol, inactivecol = inactivecol, defaultcols = defaultcols })
+  -- utils.dP({ normcol = normcol, inactivecol = inactivecol, defaultcols = defaultcols })
 
   return { fillcol = fillcol, inactivecol = inactivecol, activecol = activecol }
 end
@@ -356,8 +342,6 @@ M.default_hl = function(w, type)
   --     },
   --   }, rtrn)
   -- end
-
-  -- utils.dP({ rtrn = rtrn })
 
   return rtrn
 end

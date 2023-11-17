@@ -17,13 +17,7 @@ M.ZTabPart = {
   ---@type boolean
   isSelected = false,
   ---@type fun(s: ZTabPart): nil
-  updateContent = function(s)
-  end,
-  ---@type fun(s: ZTabPart): nil
-  updatePrefix = function(s)
-  end,
-  ---@type fun(s: ZTabPart): nil
-  updatePostfix = function(s)
+  getter = function(s)
   end,
   ---@type ZTabPartDrawFunc
   __drawfunc = function(s)
@@ -64,9 +58,7 @@ end
 
 ---@return any
 function M.ZTabPart:draw()
-  self:updateContent()
-  self:updatePrefix()
-  self:updatePostfix()
+  self:getter()
   return self.__drawfunc(self)
 end
 
