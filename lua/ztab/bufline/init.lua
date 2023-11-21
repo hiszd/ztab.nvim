@@ -437,6 +437,5 @@ return {
   draw = bufline,
   zbufgoto = zbufgoto,
   nbufgoto = nbufgoto,
-  devicon = devicon,
   title = title,
 }

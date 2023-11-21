@@ -16,9 +16,6 @@ M.ZTabPart = {
   text = {},
   ---@type boolean
   isSelected = false,
-  ---@type fun(s: ZTabPart): nil
-  getter = function(s)
-  end,
   ---@type ZTabPartDrawFunc
   __drawfunc = function(s)
     if s.isSelected then
@@ -46,6 +43,9 @@ M.ZTabPart = {
 --   self.__index = self
 --   return o
 -- end
+
+function M.ZTabPart:getter()
+end
 
 ---@param o? table
 function M.ZTabPart:new(o)

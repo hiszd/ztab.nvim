@@ -66,9 +66,15 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.modified, false, true, true, false))
           },
         },
-        text = {
-          ["content"] = require('ztab.bufline').devicon(bufnr, self.isSelected, false)
-        },
+        ---@type fun(s: ZTabPart): nil
+        getter = function(s)
+          local dev = require('ztab.bufline.getters.devicon').get(bufnr, self.isSelected, false)
+          if dev then
+            s.text["content"] = dev.icon
+            s.highlight["content"].sel = highlight.hl(dev.hlsel)
+            s.highlight["content"].nosel = highlight.hl(dev.hldsel)
+          end
+        end,
       }),
       rsep = test.ZTabPart:new({
         highlight = {

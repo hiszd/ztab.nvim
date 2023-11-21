@@ -3,3 +3,8 @@
   -- ( ) lsp highlighting
   -- (!) tab picker
 * ( ) Create Modules that can be combined in whatever way the user wants
+* (-) Create getters for each part of the tab information
+** (x) devicon
+** ( ) title
+** ( ) seperator
+** ( ) modified
