@@ -41,3 +41,7 @@ local title = function(bufnr, isSelected)
   local rtrn = { content = titl, hlsel = hlsel, hldsel = hldsel }
   return rtrn
 end
+
+return {
+  get = title
+}

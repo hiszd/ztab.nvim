@@ -84,8 +84,6 @@ M.tabsactive = function(b)
   end
 end
 
-local t1 = false
-
 ---@param isSelected boolean #Is the tab selected
 ---@return string #Return spacer with highlights
 local spacer = function(isSelected)

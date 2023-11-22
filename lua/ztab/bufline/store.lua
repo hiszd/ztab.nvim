@@ -17,6 +17,8 @@ BufTab = {
   }
 }
 
+local t1 = 0
+
 ---@param bufnr number
 ---@param sep {r: boolean,l: boolean, type: ZTabSeparatorNames}
 ---@return BufTab
@@ -43,10 +45,15 @@ function BufTab:new(bufnr, sep)
             nosel = highlight.hl(highlight.get_hl_name(constants.highlight_names.title, false, true, true, false))
           },
         },
-        text = {
-          ["content"] = require('ztab.bufline').title(bufnr, self.isSelected)
-        },
-        updateContent = function() require('ztab.bufline').title(bufnr, self.isSelected) end
+        ---@type fun(s: ZTabPart): nil
+        getter = function(s)
+          local title = require('ztab.bufline.getters.title').get(bufnr, self.isSelected)
+          if title then
+            s.text["content"] = title.content
+            s.highlight["content"].sel = highlight.hl(title.hlsel)
+            s.highlight["content"].nosel = highlight.hl(title.hldsel)
+          end
+        end,
       }),
       status = test.ZTabPart:new({
         highlight = {
@@ -68,9 +75,13 @@ function BufTab:new(bufnr, sep)
         },
         ---@type fun(s: ZTabPart): nil
         getter = function(s)
-          local dev = require('ztab.bufline.getters.devicon').get(bufnr, self.isSelected, false)
+          local dev = require('ztab.bufline.getters.devicon').get(bufnr, false)
+          if t1 < 9 then
+            P(dev)
+            t1 = t1 + 1
+          end
           if dev then
-            s.text["content"] = dev.icon
+            s.text["content"] = dev.content
             s.highlight["content"].sel = highlight.hl(dev.hlsel)
             s.highlight["content"].nosel = highlight.hl(dev.hldsel)
           end

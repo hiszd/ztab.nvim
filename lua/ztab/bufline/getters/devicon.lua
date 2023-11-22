@@ -4,10 +4,9 @@ local utils = require("ztab.utils")
 
 --- Get tab devicon content
 ---@param bufnr number #Buffer number
----@param isSelected boolean #Is the buffer selected?
 ---@param ntab boolean #Are tabs active?
----@return {icon: string, hlsel: string, hldsel: string} | nil #Return devicon with highlights
-local devicon = function(bufnr, isSelected, ntab)
+---@return {content: string, hlsel: string, hldsel: string} | nil #Return devicon with highlights
+local devicon = function(bufnr, ntab)
   local tab = ntab and "true" or "false"
   ---@type ZConfig
   local con = require("ztab").helpers.__config
@@ -172,7 +171,7 @@ local devicon = function(bufnr, isSelected, ntab)
     -- local selectedHlStart = h.hl(isSelected and hlsel or hldsel)
     -- local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, true, false))
     -- local rtrn = selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
-    local rtrn = { icon = icon, hlsel = hlsel, hldsel = hldsel }
+    local rtrn = { content = icon, hlsel = hlsel, hldsel = hldsel }
     return rtrn
   end
   return nil

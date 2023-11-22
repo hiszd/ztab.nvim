@@ -172,7 +172,7 @@ local devicon = function(bufnr, isSelected, ntab)
     -- local selectedHlStart = h.hl(isSelected and hlsel or hldsel)
     -- local selectedHlEnd = h.hl(h.get_hl_name(constants.highlight_names.title, isSelected, true, true, false))
     -- local rtrn = selectedHlStart .. icon .. selectedHlEnd .. spacer(isSelected)
-    local rtrn = { icon = icon, hlsel = hlsel, hldsel = hldsel }
+    local rtrn = { content = icon, hlsel = hlsel, hldsel = hldsel }
     return rtrn
   end
   return nil
