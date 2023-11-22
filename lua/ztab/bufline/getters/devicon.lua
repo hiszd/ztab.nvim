@@ -1,11 +1,12 @@
-local constants = require("ztab.constants")
 local highlight = require("ztab.highlight")
+local constants = require("ztab.constants")
 local utils = require("ztab.utils")
+require('ztab.types')
 
 --- Get tab devicon content
 ---@param bufnr number #Buffer number
 ---@param ntab boolean #Are tabs active?
----@return {content: string, hlsel: string, hldsel: string} | nil #Return devicon with highlights
+---@return ZTabGetterReturn #Return devicon with highlights
 local devicon = function(bufnr, ntab)
   local tab = ntab and "true" or "false"
   ---@type ZConfig

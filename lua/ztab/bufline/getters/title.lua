@@ -1,11 +1,11 @@
 local highlight = require("ztab.highlight")
 local constants = require("ztab.constants")
-local test = require("ztab.test")
+require('ztab.types')
 
 --- Get tab title text
 ---@param bufnr number #Buffer number
 ---@param isSelected boolean #Is the tab selected?
----@return {content: string, hlsel: string, hldsel: string} | nil #Return title with highlights
+---@return ZTabGetterReturn #Return title with highlights
 local title = function(bufnr, isSelected)
   local hlsel = "TabLineSel"
   local hldsel = "TabLine"

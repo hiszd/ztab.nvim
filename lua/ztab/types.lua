@@ -78,3 +78,5 @@
 ---@field tabline ZElConfig
 ---@field bufline ZElConfig
 ---@field opts ZSetupOpts
+
+---@alias ZTabGetterReturn {content: string, hlsel: string, hldsel: string} | nil
